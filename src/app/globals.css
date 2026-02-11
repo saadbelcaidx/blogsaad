@@ -152,6 +152,11 @@ html.light .hover\:border-neutral-700:hover {
   border-color: #d1d5db !important;
 }
 
+/* Light mode — counter card */
+html.light .bg-neutral-900\/50 {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
