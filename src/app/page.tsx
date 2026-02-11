@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/content";
+import { AnimatedCounter } from "@/components/counter";
 
 export default function Home() {
   const posts = getAllPosts();
@@ -12,6 +13,16 @@ export default function Home() {
         </h1>
         <p className="mt-2 text-sm text-neutral-500">
           Founder of myoProcess, Connector OS, Sales Systems Mastery.
+        </p>
+      </div>
+
+      {/* Cash collected counter */}
+      <div className="mb-12 rounded-lg border border-neutral-800 bg-neutral-900/50 px-6 py-8 text-center">
+        <p className="font-[family-name:var(--font-geist-sans)] text-3xl font-bold tracking-tight text-neutral-100 sm:text-4xl">
+          <AnimatedCounter target={826745} prefix="$" suffix="+" />
+        </p>
+        <p className="mt-2 text-sm text-neutral-500">
+          in cash collected by SSM members
         </p>
       </div>
 
