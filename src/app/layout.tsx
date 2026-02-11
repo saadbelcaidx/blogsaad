@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Sidebar } from "@/components/sidebar";
 import { getPostsByCategory } from "@/lib/content";
 import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -10,8 +15,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Saad's Blog",
-  description: "Thoughts on building, design, and technology.",
+  title: "Saad Belcaid",
+  description: "Founder of myoProcess, Connector OS, Sales Systems Mastery.",
+  metadataBase: new URL("https://saadbelcaid.me"),
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Saad Belcaid",
+  jobTitle: "Founder",
+  worksFor: [
+    { "@type": "Organization", name: "myoProcess" },
+    { "@type": "Organization", name: "Connector OS" },
+    { "@type": "Organization", name: "Sales Systems Mastery" },
+  ],
+  url: "https://saadbelcaid.me",
+  sameAs: [
+    "https://linkedin.com/in/saadbelcaid",
+    "https://x.com/belcaidsaaad",
+    "https://connector-os.com",
+    "https://skool.com/ssmasters/about",
+  ],
 };
 
 export default function RootLayout({
@@ -33,7 +58,13 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistMono.variable} antialiased`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Sidebar postsByCategory={sidebarData} />
         <main className="min-h-screen lg:pl-64">
           <div className="mx-auto max-w-3xl px-6 py-16 pt-20 lg:pt-16">

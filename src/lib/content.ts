@@ -11,6 +11,8 @@ export interface Post {
   date: string;
   category: string;
   description: string;
+  metaTitle: string;
+  targetKeywords: string;
   readingTime: string;
   content: string;
 }
@@ -31,6 +33,8 @@ export function getAllPosts(): Post[] {
       date: data.date || "",
       category: data.category || "Uncategorized",
       description: data.description || "",
+      metaTitle: data.meta_title || "",
+      targetKeywords: data.target_keywords || "",
       readingTime: stats.text,
       content,
     };

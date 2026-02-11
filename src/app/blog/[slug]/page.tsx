@@ -16,8 +16,9 @@ export async function generateMetadata({ params }: PageProps) {
   const post = getPostBySlug(slug);
   if (!post) return { title: "Not Found" };
   return {
-    title: `${post.title} — Saad's Blog`,
+    title: post.metaTitle || `${post.title} — Saad Belcaid`,
     description: post.description,
+    keywords: post.targetKeywords || undefined,
   };
 }
 
@@ -32,10 +33,10 @@ export default async function BlogPost({ params }: PageProps) {
   return (
     <article>
       <header className="mb-10">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-400">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
           {post.category}
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-900">
+        <h1 className="mt-2 font-[family-name:var(--font-geist-sans)] text-2xl font-semibold tracking-tight text-neutral-100">
           {post.title}
         </h1>
         <div className="mt-3 flex items-center gap-3 text-[12px] text-neutral-400">
