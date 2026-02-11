@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllPosts, getPostBySlug } from "@/lib/content";
+import { Newsletter } from "@/components/newsletter";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -55,6 +56,8 @@ export default async function BlogPost({ params }: PageProps) {
       <div className="prose">
         <MDXRemote source={post.content} />
       </div>
+
+      <Newsletter />
     </article>
   );
 }
