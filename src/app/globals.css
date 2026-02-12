@@ -40,11 +40,11 @@ html.light .prose h2 {
 }
 
 html.light .prose a {
-  color: #2563eb;
+  color: #7c3aed;
 }
 
 html.light .prose a:hover {
-  color: #1d4ed8;
+  color: #6d28d9;
 }
 
 html.light .prose strong {
@@ -241,13 +241,12 @@ body {
 }
 
 .prose a {
-  color: #60a5fa;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  color: #a78bfa;
+  text-decoration: none;
 }
 
 .prose a:hover {
-  color: #93bbfd;
+  color: #c4b5fd;
 }
 
 .prose strong {
@@ -322,4 +321,39 @@ body {
   border-radius: 8px;
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9375rem;
+}
+
+.prose th {
+  text-align: left;
+  font-weight: 600;
+  color: #ededed;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid #333333;
+}
+
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #262626;
+  vertical-align: top;
+}
+
+.prose tr:last-child td {
+  border-bottom: none;
+}
+
+html.light .prose th {
+  color: #111827;
+  border-bottom-color: #d1d5db;
+}
+
+html.light .prose td {
+  border-bottom-color: #e5e7eb;
 }

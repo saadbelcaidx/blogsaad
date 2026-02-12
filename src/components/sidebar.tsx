@@ -108,6 +108,18 @@ export function Sidebar({ postsByCategory }: SidebarProps) {
                     Wall of Winners
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/wiki/saadbelcaid"
+                    className={`block truncate rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
+                      pathname === "/wiki/saadbelcaid"
+                        ? "bg-neutral-800/70 font-medium text-neutral-100"
+                        : "text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200"
+                    }`}
+                  >
+                    Wiki
+                  </Link>
+                </li>
               </ul>
             </div>
 
