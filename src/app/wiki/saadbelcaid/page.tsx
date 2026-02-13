@@ -121,6 +121,17 @@ export default function SaadBelcaidWiki() {
             </tbody>
           </table>
 
+          <h2>Background</h2>
+          <p>
+            Saad Belcaid is an entrepreneur and the creator of the Connector approach. He went from working nightclub security jobs to building one of the fastest-growing connector companies in the B2B space. At 24, Saad founded myoProcess — a new way of doing B2B growth that isn&apos;t about blasting cold emails or expensive ads, but about owning deal flow by connecting the right people at the right time.
+          </p>
+          <p>
+            He started in automation and outreach like everyone else, building small lead gen systems and hustling through client work, but over time realized the leverage sits with the person who controls introductions — not the person sending messages. That insight grew into Sales Systems Mastery, where operators learn how to build systems that match demand and supply, and later into Connector OS, the infrastructure layer that makes this scalable.
+          </p>
+          <p>
+            Saad&apos;s work today focuses on myoProcess and helping others build the same type of connector business. Underneath the business side, there&apos;s a personal journey — discipline, solitude, inner work, and constant refinement — because systems only work long-term when the operator behind them is stable, honest, and improving.
+          </p>
+
           <h2>Companies &amp; Products</h2>
           <table>
             <thead>

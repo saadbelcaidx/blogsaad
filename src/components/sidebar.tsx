@@ -110,14 +110,14 @@ export function Sidebar({ postsByCategory }: SidebarProps) {
                 </li>
                 <li>
                   <Link
-                    href="/wiki/saadbelcaid"
+                    href="/about"
                     className={`block truncate rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
-                      pathname === "/wiki/saadbelcaid"
+                      pathname === "/about"
                         ? "bg-neutral-800/70 font-medium text-neutral-100"
                         : "text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200"
                     }`}
                   >
-                    Wiki
+                    About
                   </Link>
                 </li>
               </ul>
@@ -153,8 +153,22 @@ export function Sidebar({ postsByCategory }: SidebarProps) {
             ))}
           </nav>
 
+          {/* Wiki */}
+          <div className="mt-6 border-t border-neutral-800 pt-4">
+            <Link
+              href="/wiki/saadbelcaid"
+              className={`block truncate rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
+                pathname === "/wiki/saadbelcaid"
+                  ? "bg-neutral-800/70 font-medium text-neutral-100"
+                  : "text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200"
+              }`}
+            >
+              Wiki
+            </Link>
+          </div>
+
           {/* Social Links */}
-          <div className="mt-6 border-t border-neutral-800 pt-4 space-y-1">
+          <div className="mt-4 border-t border-neutral-800 pt-4 space-y-1">
             <a
               href="https://www.linkedin.com/in/saadbelcaid/"
               target="_blank"

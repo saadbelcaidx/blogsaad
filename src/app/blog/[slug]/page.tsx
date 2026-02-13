@@ -57,6 +57,24 @@ export default async function BlogPost({ params }: PageProps) {
         <MDXRemote source={post.content} />
       </div>
 
+      <div className="mt-12 border-t border-neutral-800 pt-8">
+        <a href="/about" className="group flex items-center gap-4">
+          <img
+            src="/saad.jpg"
+            alt="Saad Belcaid"
+            className="h-10 w-10 rounded-full object-cover"
+          />
+          <div>
+            <p className="text-[13px] font-medium text-neutral-300 group-hover:text-neutral-100 transition-colors">
+              Saad Belcaid
+            </p>
+            <p className="text-[11px] text-neutral-500">
+              Founder of myoProcess, Connector OS, Sales Systems Mastery.
+            </p>
+          </div>
+        </a>
+      </div>
+
       <Newsletter />
     </article>
   );
