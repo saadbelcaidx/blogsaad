@@ -123,7 +123,10 @@ export function Sidebar({ postsByCategory }: SidebarProps) {
               </ul>
             </div>
 
-            {Object.entries(postsByCategory).map(([category, posts]) => (
+            {Object.entries(postsByCategory).sort(([a], [b]) => {
+              const order = ["Building in Public", "Thoughts"];
+              return (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b));
+            }).map(([category, posts]) => (
               <div key={category}>
                 <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
                   {category}
