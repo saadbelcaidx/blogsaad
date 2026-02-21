@@ -16,10 +16,26 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) return { title: "Not Found" };
+  const title = post.metaTitle || `${post.title} — Saad Belcaid`;
   return {
-    title: post.metaTitle || `${post.title} — Saad Belcaid`,
+    title,
     description: post.description,
     keywords: post.targetKeywords || undefined,
+    openGraph: {
+      type: "article",
+      title,
+      description: post.description,
+      url: `https://saadbelcaid.me/blog/${slug}`,
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: "@belcaidsaaad",
+      creator: "@belcaidsaaad",
+      title,
+      description: post.description,
+      images: ["/og-image.png"],
+    },
   };
 }
 

@@ -34,7 +34,7 @@ export function Newsletter() {
         The operator memo.
       </h3>
       <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
-        One essay every Saturday. What I&apos;m building, what the market is doing, what most operators are missing. No fluff. Read it or don&apos;t.
+        One essay every Saturday. What I&apos;m building, what the market is doing, what most operators are missing. No fluff.
       </p>
 
       {status === "success" ? (
