@@ -31,11 +31,10 @@ export function Newsletter() {
   return (
     <div className="mt-16 rounded-lg border border-neutral-800 bg-neutral-900/50 px-6 py-8">
       <h3 className="font-[family-name:var(--font-geist-sans)] text-lg font-semibold tracking-tight text-neutral-100">
-        Weekly scaling strategies. Free.
+        The operator memo.
       </h3>
       <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
-        I share what I&apos;m doing inside myoProcess, Connector OS updates, and
-        frameworks that actually work. No fluff. Unsubscribe anytime.
+        One essay every Saturday. What I&apos;m building, what the market is doing, what most operators are missing. No fluff. Read it or don&apos;t.
       </p>
 
       {status === "success" ? (

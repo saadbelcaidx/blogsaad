@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Linkedin, Youtube, Sun, Moon, Menu, X } from "lucide-react";
+import { Linkedin, Youtube, Sun, Moon, Menu, X, Twitter } from "lucide-react";
 
 interface SidebarPost {
   slug: string;
@@ -124,8 +124,10 @@ export function Sidebar({ postsByCategory }: SidebarProps) {
             </div>
 
             {Object.entries(postsByCategory).sort(([a], [b]) => {
-              const order = ["Building in Public", "Thoughts"];
-              return (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b));
+              const order = ["Market Philosophy", "Operator Reality", "Platform Evolution", "Building in Public", "Thoughts"];
+              const ai = order.indexOf(a) === -1 ? 99 : order.indexOf(a);
+              const bi = order.indexOf(b) === -1 ? 99 : order.indexOf(b);
+              return ai - bi;
             }).map(([category, posts]) => (
               <div key={category}>
                 <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
@@ -173,6 +175,15 @@ export function Sidebar({ postsByCategory }: SidebarProps) {
           {/* Social Links */}
           <div className="mt-4 border-t border-neutral-800 pt-4 space-y-1">
             <a
+              href="https://x.com/belcaidsaaad"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-neutral-400 transition-colors hover:bg-neutral-800/50 hover:text-neutral-200"
+            >
+              <Twitter size={14} />
+              X / Twitter
+            </a>
+            <a
               href="https://www.linkedin.com/in/saadbelcaid/"
               target="_blank"
               rel="noopener noreferrer"
@@ -189,6 +200,15 @@ export function Sidebar({ postsByCategory }: SidebarProps) {
             >
               <Youtube size={14} />
               YouTube
+            </a>
+            <a
+              href="https://skool.com/ssmasters/about"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-neutral-400 transition-colors hover:bg-neutral-800/50 hover:text-neutral-200"
+            >
+              <Image src="/myoprocess.png" alt="SSM" width={14} height={14} className="rounded-sm" />
+              SSM Community
             </a>
             <a
               href="https://www.myoprocess.com"

@@ -11,8 +11,11 @@ export default function Home() {
         <h1 className="font-[family-name:var(--font-geist-sans)] text-2xl font-semibold tracking-tight text-neutral-100">
           Saad Belcaid
         </h1>
-        <p className="mt-2 text-sm text-neutral-500">
-          Founder of myoProcess, Connector OS, Sales Systems Mastery.
+        <p className="mt-2 text-sm text-neutral-400 leading-relaxed">
+          $192K MRR. Built with introductions, not ads. Founder of myoProcess, Connector OS, and SSM — 318 operators learning to own the middle.
+        </p>
+        <p className="mt-1 text-sm text-neutral-500">
+          I write about how markets actually work.
         </p>
       </div>
 
