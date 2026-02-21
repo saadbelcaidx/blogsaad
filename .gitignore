@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated social content output (local only)
+*-social.md
+week-*-social-content.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

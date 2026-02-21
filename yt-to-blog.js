@@ -1,8 +1,18 @@
-require("dotenv").config();
-const fs = require("fs");
-const path = require("path");
-const { AzureOpenAI } = require("openai");
-const { YoutubeTranscript } = require("youtube-transcript");
+// yt-to-blog.js
+// Usage: node yt-to-blog.js <youtube-url>
+//        node yt-to-blog.js --batch urls.txt
+// Converts a YouTube video transcript → blog post → full week of social content
+
+import "dotenv/config";
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+import { fileURLToPath } from "url";
+import { AzureOpenAI } from "openai";
+import { YoutubeTranscript } from "youtube-transcript";
+import { generateSchedule } from "./atomize.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const client = new AzureOpenAI({
   endpoint: process.env.AZURE_OPENAI_ENDPOINT,
@@ -33,10 +43,10 @@ STRUCTURE:
 - End with a forward-looking statement or a direct challenge to the reader. No "hope this helped" energy.
 
 Given this video transcript, write a 1500-2000 word blog post that:
-- Has an SEO-optimized title (under 60 chars, includes "Saad Belcaid" where natural)
+- Has a short, punchy title — 2-5 words max. Naval-style. Conceptual, not instructional. Never "How to..." or listicle framing. Think: "Market Maker", "Own the Middle", "Infinite Player", "Already Confident", "Bouncer to Operator". The title names the idea, not the lesson.
 - Has a meta description (under 155 chars)
 - Has a URL slug (lowercase, hyphens, no special chars)
-- Has a category (one of: Connector OS, Agency Strategy, Building in Public, SSM, Psychology)
+- Has a category. DEFAULT is always "Market Philosophy". Only use something else if the content is unmistakably about one of these: "Operator Reality" (closing tactics, identity shifts), "Platform Evolution" (Connector OS technical updates), "Building in Public" (origin stories, SSM/myoProcess history), "Thoughts" (books, pure philosophy, personal reflection). When in doubt — Market Philosophy.
 - Includes the key insights from the video in written form
 - Opens strong — first 100 words must contain the primary topic keyword
 
@@ -64,25 +74,18 @@ async function getTranscript(url) {
     const transcript = await YoutubeTranscript.fetchTranscript(videoId);
     const text = transcript.map((t) => t.text).join(" ");
 
-    if (!text || text.length < 50) {
-      throw new Error("Transcript too short or empty");
-    }
+    if (!text || text.length < 50) throw new Error("Transcript too short or empty");
 
-    console.log(
-      `  Got transcript: ${text.length} chars (${Math.round(text.split(" ").length)} words)`
-    );
+    console.log(`  Got transcript: ${text.length} chars (${Math.round(text.split(" ").length)} words)`);
     return text;
   } catch (err) {
-    // Fallback: try yt-dlp
     console.log(`  YouTube Transcript API failed, trying yt-dlp...`);
     return await getTranscriptYtDlp(url);
   }
 }
 
 async function getTranscriptYtDlp(url) {
-  const { execSync } = require("child_process");
   const tmpFile = path.join(__dirname, `_tmp_sub_${Date.now()}`);
-
   try {
     execSync(
       `yt-dlp --write-auto-sub --sub-lang en --skip-download --sub-format vtt -o "${tmpFile}" "${url}"`,
@@ -90,14 +93,11 @@ async function getTranscriptYtDlp(url) {
     );
 
     const vttFile = `${tmpFile}.en.vtt`;
-    if (!fs.existsSync(vttFile)) {
-      throw new Error("yt-dlp did not produce a subtitle file");
-    }
+    if (!fs.existsSync(vttFile)) throw new Error("yt-dlp did not produce a subtitle file");
 
     const vtt = fs.readFileSync(vttFile, "utf-8");
     fs.unlinkSync(vttFile);
 
-    // Parse VTT — strip timestamps and metadata
     const text = vtt
       .split("\n")
       .filter(
@@ -113,12 +113,9 @@ async function getTranscriptYtDlp(url) {
       .filter(Boolean)
       .join(" ");
 
-    console.log(
-      `  Got transcript via yt-dlp: ${text.length} chars (${Math.round(text.split(" ").length)} words)`
-    );
+    console.log(`  Got transcript via yt-dlp: ${text.length} chars`);
     return text;
   } catch (err) {
-    // Clean up any temp files
     try {
       const files = fs.readdirSync(__dirname).filter((f) => f.startsWith("_tmp_sub_"));
       files.forEach((f) => fs.unlinkSync(path.join(__dirname, f)));
@@ -143,15 +140,11 @@ function extractVideoId(url) {
 
 async function generatePost(transcript) {
   console.log("  Generating blog post with Azure OpenAI...");
-
   const response = await client.chat.completions.create({
     model: process.env.AZURE_OPENAI_DEPLOYMENT,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `Here is the video transcript. Convert it into a blog post:\n\n${transcript}`,
-      },
+      { role: "user", content: `Here is the video transcript. Convert it into a blog post:\n\n${transcript}` },
     ],
     temperature: 0.7,
     max_tokens: 4000,
@@ -159,12 +152,10 @@ async function generatePost(transcript) {
 
   const content = response.choices[0].message.content;
   if (!content) throw new Error("Empty response from Azure OpenAI");
-
   return content.trim();
 }
 
 function extractSlug(mdxContent) {
-  // Try to get slug from frontmatter or generate from title
   const titleMatch = mdxContent.match(/^title:\s*"(.+)"/m);
   if (titleMatch) {
     return titleMatch[1]
@@ -179,24 +170,16 @@ function extractSlug(mdxContent) {
 }
 
 function escapeJsxBraces(mdxContent) {
-  // Split into frontmatter and body
   const parts = mdxContent.split("---");
   if (parts.length < 3) return mdxContent;
 
   const frontmatter = parts[1];
   const body = parts.slice(2).join("---");
 
-  // Escape curly braces in body that aren't already escaped
-  const escapedBody = body.replace(
-    /(?<!\\)\{([^}]*)\}/g,
-    (match, inner) => {
-      // Don't escape if it looks like a real JSX expression
-      if (inner.includes("(") || inner.includes("=>") || inner.includes("import")) {
-        return match;
-      }
-      return `\\{${inner}\\}`;
-    }
-  );
+  const escapedBody = body.replace(/(?<!\\)\{([^}]*)\}/g, (match, inner) => {
+    if (inner.includes("(") || inner.includes("=>") || inner.includes("import")) return match;
+    return `\\{${inner}\\}`;
+  });
 
   return `---${frontmatter}---${escapedBody}`;
 }
@@ -214,8 +197,13 @@ async function processUrl(url) {
 
   fs.writeFileSync(filepath, mdxContent, "utf-8");
   console.log(`  Saved: content/${filename}`);
+  console.log(`  Blog live at: /blog/${slug}`);
 
-  return filename;
+  // Auto-atomize into social content
+  console.log(`\n  Atomizing into social content...`);
+  await generateSchedule(slug);
+
+  return { slug, filename };
 }
 
 async function main() {
@@ -228,32 +216,22 @@ async function main() {
     process.exit(1);
   }
 
-  // Check env vars
   if (
     !process.env.AZURE_OPENAI_ENDPOINT ||
     !process.env.AZURE_OPENAI_API_KEY ||
     !process.env.AZURE_OPENAI_DEPLOYMENT
   ) {
-    console.error(
-      "Error: Missing .env vars. Need AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_DEPLOYMENT"
-    );
+    console.error("Error: Missing .env vars. Need AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_DEPLOYMENT");
     process.exit(1);
   }
 
   if (args[0] === "--batch") {
-    if (!args[1]) {
-      console.error("Error: --batch requires a file path");
-      process.exit(1);
-    }
+    if (!args[1]) { console.error("Error: --batch requires a file path"); process.exit(1); }
 
     const urlFile = path.resolve(args[1]);
-    if (!fs.existsSync(urlFile)) {
-      console.error(`Error: File not found: ${urlFile}`);
-      process.exit(1);
-    }
+    if (!fs.existsSync(urlFile)) { console.error(`Error: File not found: ${urlFile}`); process.exit(1); }
 
-    const urls = fs
-      .readFileSync(urlFile, "utf-8")
+    const urls = fs.readFileSync(urlFile, "utf-8")
       .split("\n")
       .map((u) => u.trim())
       .filter((u) => u && !u.startsWith("#"));
@@ -263,7 +241,7 @@ async function main() {
     const results = [];
     for (const url of urls) {
       try {
-        const filename = await processUrl(url);
+        const { filename } = await processUrl(url);
         results.push({ url, filename, status: "ok" });
       } catch (err) {
         console.error(`  FAILED: ${err.message}`);
@@ -273,17 +251,13 @@ async function main() {
 
     console.log("\n--- Results ---");
     for (const r of results) {
-      const icon = r.status === "ok" ? "+" : "x";
-      console.log(`  [${icon}] ${r.url} → ${r.filename || r.status}`);
+      console.log(`  [${r.status === "ok" ? "+" : "x"}] ${r.url} → ${r.filename || r.status}`);
     }
-    console.log(
-      `\nDone: ${results.filter((r) => r.status === "ok").length}/${results.length} succeeded`
-    );
+    console.log(`\nDone: ${results.filter((r) => r.status === "ok").length}/${results.length} succeeded`);
   } else {
-    // Single URL
     try {
       await processUrl(args[0]);
-      console.log("\nDone!");
+      console.log("\nAll done. Blog post + social content ready.");
     } catch (err) {
       console.error(`\nFailed: ${err.message}`);
       process.exit(1);
