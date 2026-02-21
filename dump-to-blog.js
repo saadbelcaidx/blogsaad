@@ -248,6 +248,13 @@ async function main() {
   console.log(`\n  Atomizing into social content...`);
   await generateSchedule(slug);
 
+  // Auto deploy
+  console.log(`\n  Deploying to saadbelcaid.me...`);
+  execSync(`git add content/${filename} && git commit -m "New post: ${slug}" && git push origin main && vercel --prod`, {
+    stdio: "inherit",
+    cwd: __dirname,
+  });
+
   console.log("\nAll done. Blog post + social content ready.");
 }
 

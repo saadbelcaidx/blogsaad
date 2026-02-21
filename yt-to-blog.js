@@ -203,6 +203,13 @@ async function processUrl(url) {
   console.log(`\n  Atomizing into social content...`);
   await generateSchedule(slug);
 
+  // Auto deploy
+  console.log(`\n  Deploying to saadbelcaid.me...`);
+  execSync(`git add content/${filename} && git commit -m "New post: ${slug}" && git push origin main && vercel --prod`, {
+    stdio: "inherit",
+    cwd: __dirname,
+  });
+
   return { slug, filename };
 }
 
