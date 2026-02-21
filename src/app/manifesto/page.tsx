@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 const principles = [
-  "Seek deal flow, not clients. Every day, instead of asking "who can I work for?" — ask "where are deals already happening?" and put yourself in the middle of that movement.",
+  `Seek deal flow, not clients. Every day, instead of asking "who can I work for?" — ask "where are deals already happening?" and put yourself in the middle of that movement.`,
   "Wealth comes from position, not labor. If you're doing the fulfillment, you're a vendor. If you control who meets who, you're the infrastructure.",
   "Ignore people building agencies. They gain revenue by adding headcount. You gain revenue by adding signal.",
   "You're not going to get rich selling services. You must own the flow of deals — the introductions, the access, the trust — to gain your freedom.",
