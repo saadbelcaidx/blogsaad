@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
 export const maxDuration = 120;
+export const dynamic = "force-dynamic";
 
-const client = new OpenAI({
-  apiKey: process.env.AZURE_OPENAI_API_KEY,
-  baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}`,
-  defaultQuery: { "api-version": "2024-02-01" },
-  defaultHeaders: { "api-key": process.env.AZURE_OPENAI_API_KEY },
-});
+function getClient() {
+  return new OpenAI({
+    apiKey: process.env.AZURE_OPENAI_API_KEY ?? "",
+    baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}`,
+    defaultQuery: { "api-version": "2024-02-01" },
+    defaultHeaders: { "api-key": process.env.AZURE_OPENAI_API_KEY ?? "" },
+  });
+}
 
 const VOICE_GUIDE = `
 You are ghostwriting content for Saad Belcaid — founder of myoProcess ($192K MRR), Connector OS, and Sales Systems Mastery (318 operators).
@@ -203,6 +206,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Generate blog post
+  const client = getClient();
   let blogMessages: Parameters<typeof client.chat.completions.create>[0]["messages"];
 
   if (inputType === "image") {
