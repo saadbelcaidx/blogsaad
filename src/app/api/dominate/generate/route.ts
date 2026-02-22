@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { YoutubeTranscript } from "youtube-transcript";
 
 export const maxDuration = 120;
 
@@ -94,6 +93,28 @@ Format with ### Saturday, ### Sunday etc headers. Thread tweets numbered 1/ thro
 
 Output LinkedIn section first under ## LINKEDIN, then X under ## X / TWITTER.`;
 
+async function fetchTranscript(videoId: string): Promise<string> {
+  const apiKey = process.env.SUPADATA_API_KEY;
+  if (!apiKey) throw new Error("SUPADATA_API_KEY not configured.");
+
+  const res = await fetch(
+    `https://api.supadata.ai/v1/youtube/transcript?videoId=${videoId}&text=true`,
+    { headers: { "x-api-key": apiKey } }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Supadata error ${res.status}: ${err.slice(0, 100)}`);
+  }
+
+  const data = await res.json() as { content?: string; error?: string };
+  const text = (data.content ?? "").trim();
+
+  if (!text || text.length < 100) throw new Error("Transcript is empty. The video may have no spoken content.");
+
+  return text;
+}
+
 function extractVideoId(url: string): string | null {
   const patterns = [
     /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
@@ -155,10 +176,10 @@ export async function POST(request: NextRequest) {
       if (!videoId) return NextResponse.json({ error: "Invalid YouTube URL" }, { status: 400 });
 
       try {
-        const transcript = await YoutubeTranscript.fetchTranscript(videoId);
-        rawInput = transcript.map((t: { text: string }) => t.text).join(" ");
-      } catch {
-        return NextResponse.json({ error: "Could not fetch transcript. The video may have captions disabled." }, { status: 400 });
+        rawInput = await fetchTranscript(videoId);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        return NextResponse.json({ error: `Could not fetch transcript: ${msg}` }, { status: 400 });
       }
     } else if (type === "image") {
       const file = form.get("image") as File;
@@ -174,6 +195,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     inputType = body.type;
     rawInput = body.text || body.url || "";
+  }
+
+  // Guard: must have content
+  if (inputType !== "image" && !rawInput.trim()) {
+    return NextResponse.json({ error: "No content to generate from. Please provide a URL, text, or image." }, { status: 400 });
   }
 
   // Generate blog post
