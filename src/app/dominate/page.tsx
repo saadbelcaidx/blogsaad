@@ -20,11 +20,23 @@ import {
   Linkedin,
   Globe,
   Users,
+  Radar,
+  Zap,
+  ArrowRight,
+  AlertTriangle,
+  Flame,
+  Target,
+  Sparkles,
+  Scissors,
+  Film,
+  Play,
+  Clapperboard,
+  MessageSquare,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Tab = "generate" | "metrics" | "calendar" | "autopost";
+type Tab = "generate" | "metrics" | "calendar" | "autopost" | "signals" | "clips";
 type Mode = "youtube" | "text" | "image";
 type Step =
   | "idle"
@@ -903,6 +915,879 @@ function AutoPostTab({ storedPassword }: { storedPassword: string }) {
   );
 }
 
+// ─── Signals Tab ──────────────────────────────────────────────────────────────
+
+interface Signal {
+  pain: string;
+  frequency: string;
+  emotion: string;
+  sources: string[];
+  curiosity_gap: number;
+  pain_intensity: number;
+  audience_size: number;
+  authority_match: number;
+  total: number;
+  titles: string[];
+  hook_suggestion: string;
+}
+
+interface GeneratedScript {
+  titles: string[];
+  thumbnails: string[];
+  script: {
+    hook: string;
+    setup: string;
+    insight: string;
+    framework: string;
+    proof: string;
+    cta: string;
+  };
+  broll: string[];
+  estimated_length: string;
+  hook_type: string;
+}
+
+interface Clip {
+  clip_number: number;
+  start_time: string;
+  end_time: string;
+  duration_seconds: number;
+  transcript_excerpt: string;
+  hook_line: string;
+  category: string;
+  x_post: string;
+  linkedin_post: string;
+  shorts_description: string;
+  virality_score: number;
+}
+
+const DEFAULT_SUBREDDITS = [
+  "Entrepreneur",
+  "SaaS",
+  "coldoutreach",
+  "digital_marketing",
+  "agency",
+];
+
+const DEFAULT_KEYWORDS = [
+  "agency stuck",
+  "cold email not working",
+  "can't get clients",
+  "outbound dying",
+  "AI agency",
+  "freelancing plateau",
+  "lead generation difficult",
+  "business model stuck",
+];
+
+function SignalsTab({ storedPassword }: { storedPassword: string }) {
+  const [mining, setMining] = useState(false);
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [rawCount, setRawCount] = useState(0);
+  const [sources, setSources] = useState<{ reddit: number; youtube: number }>({ reddit: 0, youtube: 0 });
+  const [error, setError] = useState("");
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [copiedTitle, setCopiedTitle] = useState("");
+  const [minedAt, setMinedAt] = useState("");
+
+  // Script generation state
+  const [generatingScript, setGeneratingScript] = useState<number | null>(null);
+  const [generatedScripts, setGeneratedScripts] = useState<Record<number, GeneratedScript>>({});
+  const [scriptError, setScriptError] = useState("");
+  const [activeScriptSection, setActiveScriptSection] = useState<string>("hook");
+
+  // Config
+  const [showConfig, setShowConfig] = useState(false);
+  const [subreddits, setSubreddits] = useState(DEFAULT_SUBREDDITS.join(", "));
+  const [keywords, setKeywords] = useState(DEFAULT_KEYWORDS.join(", "));
+  const [ytChannelIds, setYtChannelIds] = useState("");
+
+  const mine = async () => {
+    setMining(true);
+    setError("");
+    setSignals([]);
+
+    try {
+      const res = await fetch("/api/dominate/signals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-dominate-password": storedPassword,
+        },
+        body: JSON.stringify({
+          subreddits: subreddits.split(",").map((s) => s.trim()).filter(Boolean),
+          keywords: keywords.split(",").map((s) => s.trim()).filter(Boolean),
+          youtubeChannelIds: ytChannelIds.split(",").map((s) => s.trim()).filter(Boolean),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Mining failed.");
+        setMining(false);
+        return;
+      }
+
+      if (data.error && data.signals?.length === 0) {
+        setError(data.error);
+      }
+
+      setSignals(data.signals ?? []);
+      setRawCount(data.raw_count ?? 0);
+      setSources(data.sources ?? { reddit: 0, youtube: 0 });
+      setMinedAt(data.mined_at ?? "");
+    } catch {
+      setError("Request failed. Try again.");
+    } finally {
+      setMining(false);
+    }
+  };
+
+  const copyTitle = (title: string) => {
+    navigator.clipboard.writeText(title);
+    setCopiedTitle(title);
+    setTimeout(() => setCopiedTitle(""), 2000);
+  };
+
+  const generateScript = async (idx: number) => {
+    const signal = signals[idx];
+    if (!signal) return;
+    setGeneratingScript(idx);
+    setScriptError("");
+
+    try {
+      const res = await fetch("/api/dominate/script", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-dominate-password": storedPassword,
+        },
+        body: JSON.stringify({
+          pain: signal.pain,
+          selectedTitle: signal.titles[0] ?? "",
+          emotion: signal.emotion,
+          hook_suggestion: signal.hook_suggestion,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setScriptError(data.error || "Script generation failed.");
+        setGeneratingScript(null);
+        return;
+      }
+
+      setGeneratedScripts((prev) => ({ ...prev, [idx]: data }));
+      setActiveScriptSection("hook");
+    } catch {
+      setScriptError("Request failed. Try again.");
+    } finally {
+      setGeneratingScript(null);
+    }
+  };
+
+  const emotionIcon = (emotion: string) => {
+    switch (emotion) {
+      case "frustration": return <Flame size={12} className="text-red-400" />;
+      case "anxiety": return <AlertTriangle size={12} className="text-amber-400" />;
+      case "confusion": return <Target size={12} className="text-blue-400" />;
+      case "curiosity": return <Sparkles size={12} className="text-purple-400" />;
+      default: return <Zap size={12} className="text-neutral-400" />;
+    }
+  };
+
+  const scoreColor = (total: number) => {
+    if (total >= 32) return "text-green-400 bg-green-500/10";
+    if (total >= 28) return "text-amber-400 bg-amber-500/10";
+    return "text-neutral-400 bg-neutral-800";
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Signal Miner</p>
+        <p className="mt-0.5 text-[13px] text-neutral-500">
+          Mine Reddit + YouTube for audience pain signals. Get scored video ideas with ready-to-use titles.
+        </p>
+      </div>
+
+      {/* Config toggle */}
+      <button
+        onClick={() => setShowConfig(!showConfig)}
+        className="mb-4 flex items-center gap-1.5 text-[12px] text-neutral-500 hover:text-neutral-300 transition-colors"
+      >
+        {showConfig ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        Configure sources
+      </button>
+
+      {showConfig && (
+        <div className="mb-6 space-y-3 rounded-lg border border-neutral-800 bg-neutral-900/40 p-4">
+          <div>
+            <label className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 block mb-1.5">
+              Subreddits (comma-separated)
+            </label>
+            <input
+              type="text"
+              value={subreddits}
+              onChange={(e) => setSubreddits(e.target.value)}
+              className="w-full bg-transparent text-[13px] text-neutral-200 placeholder-neutral-600 outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 block mb-1.5">
+              Search keywords (comma-separated)
+            </label>
+            <input
+              type="text"
+              value={keywords}
+              onChange={(e) => setKeywords(e.target.value)}
+              className="w-full bg-transparent text-[13px] text-neutral-200 placeholder-neutral-600 outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 block mb-1.5">
+              YouTube Channels (optional, comma-separated)
+            </label>
+            <input
+              type="text"
+              value={ytChannelIds}
+              onChange={(e) => setYtChannelIds(e.target.value)}
+              placeholder="@SaadBelcaid, https://youtube.com/@AlexHormozi, UCxxxxxxxx"
+              className="w-full bg-transparent text-[13px] text-neutral-200 placeholder-neutral-600 outline-none"
+            />
+            <p className="mt-1 text-[11px] text-neutral-600">
+              Paste URLs, @handles, or channel IDs. Leave empty to mine Reddit only.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Mine button */}
+      <button
+        onClick={mine}
+        disabled={mining}
+        className="flex items-center gap-2 rounded-md bg-neutral-100 px-5 py-2.5 text-[13px] font-semibold text-neutral-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {mining ? (
+          <>
+            <Loader2 size={14} className="animate-spin" />
+            Mining signals...
+          </>
+        ) : (
+          <>
+            <Radar size={14} />
+            Mine Signals
+          </>
+        )}
+      </button>
+
+      {/* Error */}
+      {error && (
+        <div className="mt-4 rounded-md border border-red-900/50 bg-red-950/30 px-4 py-3 text-[13px] text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Results */}
+      {signals.length > 0 && (
+        <div className="mt-8 space-y-6">
+          {/* Stats bar */}
+          <div className="flex items-center gap-6 text-[12px] text-neutral-500">
+            <span>{rawCount} raw signals mined</span>
+            <span>Reddit: {sources.reddit}</span>
+            <span>YouTube: {sources.youtube}</span>
+            {minedAt && (
+              <span className="ml-auto text-[11px] text-neutral-600">
+                {new Date(minedAt).toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          {/* Signal cards */}
+          <div className="space-y-3">
+            {signals.map((signal, idx) => (
+              <div
+                key={idx}
+                className="rounded-lg border border-neutral-800 bg-neutral-900/40 overflow-hidden"
+              >
+                {/* Signal header */}
+                <button
+                  onClick={() => setExpandedIdx(expandedIdx === idx ? null : idx)}
+                  className="flex w-full items-start justify-between px-4 py-4 text-left"
+                >
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold font-[family-name:var(--font-geist-mono)] ${scoreColor(signal.total)}`}>
+                        {signal.total}
+                      </span>
+                      {emotionIcon(signal.emotion)}
+                      <span className="text-[11px] text-neutral-500 uppercase tracking-wider">
+                        {signal.emotion}
+                      </span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider font-medium ${
+                        signal.frequency === "high"
+                          ? "bg-red-500/10 text-red-400"
+                          : signal.frequency === "medium"
+                          ? "bg-amber-500/10 text-amber-400"
+                          : "bg-neutral-800 text-neutral-500"
+                      }`}>
+                        {signal.frequency}
+                      </span>
+                    </div>
+                    <p className="text-[14px] font-medium text-neutral-200 leading-snug">
+                      {signal.pain}
+                    </p>
+                  </div>
+                  <div className="shrink-0 mt-1">
+                    {expandedIdx === idx ? (
+                      <ChevronUp size={14} className="text-neutral-500" />
+                    ) : (
+                      <ChevronDown size={14} className="text-neutral-500" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Expanded content */}
+                {expandedIdx === idx && (
+                  <div className="border-t border-neutral-800 px-4 pb-5 pt-4 space-y-5">
+                    {/* Scores breakdown */}
+                    <div className="grid grid-cols-4 gap-3">
+                      {[
+                        { label: "Curiosity", val: signal.curiosity_gap },
+                        { label: "Pain", val: signal.pain_intensity },
+                        { label: "Audience", val: signal.audience_size },
+                        { label: "Authority", val: signal.authority_match },
+                      ].map(({ label, val }) => (
+                        <div key={label} className="text-center">
+                          <div className="text-[18px] font-semibold text-neutral-200 font-[family-name:var(--font-geist-mono)]">
+                            {val}
+                          </div>
+                          <div className="text-[10px] uppercase tracking-wider text-neutral-500 mt-0.5">
+                            {label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Title suggestions */}
+                    {signal.titles.length > 0 && (
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                          Title Suggestions
+                        </p>
+                        <div className="space-y-1.5">
+                          {signal.titles.map((title, tIdx) => (
+                            <div
+                              key={tIdx}
+                              className="group flex items-center justify-between rounded-md border border-neutral-800/60 px-3 py-2.5 hover:border-neutral-700 transition-colors"
+                            >
+                              <span className="text-[13px] text-neutral-300">{title}</span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); copyTitle(title); }}
+                                className="shrink-0 ml-3 flex items-center gap-1 rounded px-2 py-0.5 text-[11px] text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300 transition-colors"
+                              >
+                                {copiedTitle === title ? (
+                                  <><Check size={10} className="text-green-400" /> Copied</>
+                                ) : (
+                                  <><Copy size={10} /> Copy</>
+                                )}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Hook suggestion */}
+                    {signal.hook_suggestion && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            Hook (First 15 Seconds)
+                          </p>
+                          <CopyButton text={signal.hook_suggestion} />
+                        </div>
+                        <div className="rounded-md border border-neutral-800/60 bg-neutral-950/50 px-4 py-3">
+                          <pre className="whitespace-pre-wrap font-[family-name:var(--font-geist-mono)] text-[12px] leading-relaxed text-neutral-400">
+                            {signal.hook_suggestion}
+                          </pre>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Sources */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {signal.sources.map((src, sIdx) => (
+                        <span
+                          key={sIdx}
+                          className="rounded bg-neutral-800 px-2 py-0.5 text-[10px] font-medium text-neutral-500 uppercase tracking-wider"
+                        >
+                          {src}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Generate Script Button */}
+                    <div className="border-t border-neutral-800/60 pt-4">
+                      {!generatedScripts[idx] ? (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); generateScript(idx); }}
+                          disabled={generatingScript === idx}
+                          className="flex items-center gap-2 rounded-md bg-neutral-100 px-4 py-2 text-[13px] font-semibold text-neutral-900 transition-colors hover:bg-white disabled:opacity-40"
+                        >
+                          {generatingScript === idx ? (
+                            <><Loader2 size={14} className="animate-spin" /> Generating script...</>
+                          ) : (
+                            <><Clapperboard size={14} /> Generate Full Script</>
+                          )}
+                        </button>
+                      ) : (
+                        <div className="space-y-4">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-green-400">
+                            Script Generated — {generatedScripts[idx].estimated_length} • {generatedScripts[idx].hook_type} hook
+                          </p>
+
+                          {/* Extra title variants */}
+                          <div>
+                            <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                              15 Title Variants
+                            </p>
+                            <div className="space-y-1 max-h-48 overflow-y-auto">
+                              {generatedScripts[idx].titles.map((t, tIdx) => (
+                                <div key={tIdx} className="group flex items-center justify-between rounded-md border border-neutral-800/60 px-3 py-2 hover:border-neutral-700 transition-colors">
+                                  <span className="text-[12px] text-neutral-300">{t}</span>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); copyTitle(t); }}
+                                    className="shrink-0 ml-2 flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                                  >
+                                    {copiedTitle === t ? <><Check size={10} className="text-green-400" /> Copied</> : <><Copy size={10} /> Copy</>}
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Thumbnail text options */}
+                          <div>
+                            <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                              Thumbnail Text
+                            </p>
+                            <div className="flex gap-2">
+                              {generatedScripts[idx].thumbnails.map((thumb, tIdx) => (
+                                <div key={tIdx} className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-[13px] font-bold text-neutral-100 uppercase tracking-wide">
+                                  {thumb}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Script sections */}
+                          <div>
+                            <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                              Full Script
+                            </p>
+                            <div className="flex gap-1 mb-3 flex-wrap">
+                              {(["hook", "setup", "insight", "framework", "proof", "cta"] as const).map((section) => (
+                                <button
+                                  key={section}
+                                  onClick={(e) => { e.stopPropagation(); setActiveScriptSection(section); }}
+                                  className={`rounded-md px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider transition-colors ${
+                                    activeScriptSection === section
+                                      ? "bg-neutral-700 text-neutral-100"
+                                      : "text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                                  }`}
+                                >
+                                  {section}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="rounded-md border border-neutral-800/60 bg-neutral-950/50 px-4 py-3">
+                              <div className="flex justify-end mb-2">
+                                <CopyButton text={generatedScripts[idx].script[activeScriptSection as keyof typeof generatedScripts[typeof idx]["script"]] ?? ""} />
+                              </div>
+                              <pre className="whitespace-pre-wrap font-[family-name:var(--font-geist-mono)] text-[12px] leading-relaxed text-neutral-400">
+                                {generatedScripts[idx].script[activeScriptSection as keyof typeof generatedScripts[typeof idx]["script"]] ?? ""}
+                              </pre>
+                            </div>
+                          </div>
+
+                          {/* B-roll suggestions */}
+                          {generatedScripts[idx].broll.length > 0 && (
+                            <div>
+                              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                                B-Roll Suggestions
+                              </p>
+                              <div className="space-y-1">
+                                {generatedScripts[idx].broll.map((br, bIdx) => (
+                                  <div key={bIdx} className="flex items-start gap-2 text-[12px] text-neutral-400">
+                                    <Film size={11} className="mt-0.5 shrink-0 text-neutral-600" />
+                                    {br}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {scriptError && expandedIdx === idx && (
+                        <div className="mt-3 rounded-md border border-red-900/50 bg-red-950/30 px-3 py-2 text-[12px] text-red-400">
+                          {scriptError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Clips Tab ────────────────────────────────────────────────────────────────
+
+function ClipsTab({ storedPassword }: { storedPassword: string }) {
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [manualTranscript, setManualTranscript] = useState("");
+  const [showManual, setShowManual] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [error, setError] = useState("");
+  const [videoTitle, setVideoTitle] = useState("");
+  const [totalDuration, setTotalDuration] = useState("");
+  const [clips, setClips] = useState<Clip[]>([]);
+  const [expandedClip, setExpandedClip] = useState<number | null>(null);
+  const [copiedText, setCopiedText] = useState("");
+  const [postingClip, setPostingClip] = useState<string | null>(null);
+  const [postedClips, setPostedClips] = useState<Record<string, string>>({});
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(text);
+    setTimeout(() => setCopiedText(""), 2000);
+  };
+
+  const postToTypefully = async (content: string, platform: "x" | "linkedin", clipKey: string) => {
+    setPostingClip(clipKey);
+    try {
+      const res = await fetch("/api/dominate/autopost", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-dominate-password": storedPassword,
+        },
+        body: JSON.stringify({ content, scheduleMode: "next-free-slot", platform }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to post.");
+        setPostingClip(null);
+        return;
+      }
+      setPostedClips((prev) => ({ ...prev, [clipKey]: platform }));
+    } catch {
+      setError("Post failed. Try again.");
+    } finally {
+      setPostingClip(null);
+    }
+  };
+
+  const analyze = async () => {
+    setAnalyzing(true);
+    setError("");
+    setClips([]);
+    setVideoTitle("");
+    setTotalDuration("");
+
+    try {
+      const res = await fetch("/api/dominate/clips", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-dominate-password": storedPassword,
+        },
+        body: JSON.stringify({
+          youtubeUrl: youtubeUrl || undefined,
+          transcript: manualTranscript || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.needs_manual_transcript) {
+        setShowManual(true);
+        setError(data.error);
+        setAnalyzing(false);
+        return;
+      }
+
+      if (!res.ok || data.error) {
+        setError(data.error || "Analysis failed.");
+        setAnalyzing(false);
+        return;
+      }
+
+      setVideoTitle(data.video_title ?? "");
+      setTotalDuration(data.total_duration ?? "");
+      setClips(data.clips ?? []);
+    } catch {
+      setError("Request failed. Try again.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const categoryColor = (cat: string) => {
+    switch (cat) {
+      case "contrarian": return "bg-red-500/10 text-red-400";
+      case "proof": return "bg-green-500/10 text-green-400";
+      case "framework": return "bg-blue-500/10 text-blue-400";
+      case "story": return "bg-purple-500/10 text-purple-400";
+      case "golden-nugget": return "bg-amber-500/10 text-amber-400";
+      case "quote": return "bg-neutral-700 text-neutral-300";
+      default: return "bg-neutral-800 text-neutral-400";
+    }
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Clip + Distribution</p>
+        <p className="mt-0.5 text-[13px] text-neutral-500">
+          Paste a video URL or transcript. Get 5-8 clip-worthy segments with ready-to-post social copy.
+        </p>
+      </div>
+
+      {/* Input */}
+      <div className="mb-4 rounded-lg border border-neutral-800 bg-neutral-900/40 p-4 space-y-3">
+        <input
+          type="url"
+          value={youtubeUrl}
+          onChange={(e) => { setYoutubeUrl(e.target.value); setShowManual(false); }}
+          placeholder="https://youtube.com/watch?v=..."
+          className="w-full bg-transparent text-[14px] text-neutral-200 placeholder-neutral-600 outline-none"
+        />
+
+        <button
+          onClick={() => setShowManual(!showManual)}
+          className="flex items-center gap-1.5 text-[12px] text-neutral-500 hover:text-neutral-300 transition-colors"
+        >
+          {showManual ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          {showManual ? "Hide transcript input" : "Paste transcript manually"}
+        </button>
+
+        {showManual && (
+          <div className="space-y-2">
+            <p className="text-[11px] text-neutral-600">
+              On YouTube: click <span className="text-neutral-400">...</span> → <span className="text-neutral-400">Show transcript</span> → select all → copy
+            </p>
+            <textarea
+              value={manualTranscript}
+              onChange={(e) => setManualTranscript(e.target.value)}
+              placeholder="Paste full video transcript here..."
+              rows={8}
+              className="w-full resize-none bg-transparent text-[13px] leading-relaxed text-neutral-200 placeholder-neutral-600 outline-none"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Analyze button */}
+      <button
+        onClick={analyze}
+        disabled={analyzing || (!youtubeUrl && !manualTranscript)}
+        className="flex items-center gap-2 rounded-md bg-neutral-100 px-5 py-2.5 text-[13px] font-semibold text-neutral-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {analyzing ? (
+          <><Loader2 size={14} className="animate-spin" /> Analyzing video...</>
+        ) : (
+          <><Scissors size={14} /> Find Clips</>
+        )}
+      </button>
+
+      {/* Error */}
+      {error && (
+        <div className="mt-4 rounded-md border border-red-900/50 bg-red-950/30 px-4 py-3 text-[13px] text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Results */}
+      {clips.length > 0 && (
+        <div className="mt-8 space-y-6">
+          {/* Video info */}
+          <div className="flex items-center gap-6 text-[12px] text-neutral-500">
+            {videoTitle && <span className="text-neutral-300 font-medium">{videoTitle}</span>}
+            {totalDuration && <span>{totalDuration}</span>}
+            <span>{clips.length} clips found</span>
+          </div>
+
+          {/* Clip cards */}
+          <div className="space-y-3">
+            {clips.map((clip) => (
+              <div
+                key={clip.clip_number}
+                className="rounded-lg border border-neutral-800 bg-neutral-900/40 overflow-hidden"
+              >
+                <button
+                  onClick={() => setExpandedClip(expandedClip === clip.clip_number ? null : clip.clip_number)}
+                  className="flex w-full items-start justify-between px-4 py-4 text-left"
+                >
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="rounded px-1.5 py-0.5 text-[11px] font-bold font-[family-name:var(--font-geist-mono)] bg-neutral-700 text-neutral-200">
+                        #{clip.clip_number}
+                      </span>
+                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${categoryColor(clip.category)}`}>
+                        {clip.category}
+                      </span>
+                      <span className="text-[11px] text-neutral-500 font-[family-name:var(--font-geist-mono)]">
+                        {clip.start_time} → {clip.end_time}
+                      </span>
+                      <span className="text-[11px] text-neutral-600">
+                        {clip.duration_seconds}s
+                      </span>
+                      <span className={`ml-auto rounded px-1.5 py-0.5 text-[11px] font-bold font-[family-name:var(--font-geist-mono)] ${
+                        clip.virality_score >= 8 ? "bg-green-500/10 text-green-400" :
+                        clip.virality_score >= 6 ? "bg-amber-500/10 text-amber-400" :
+                        "bg-neutral-800 text-neutral-400"
+                      }`}>
+                        {clip.virality_score}/10
+                      </span>
+                    </div>
+                    <p className="text-[14px] font-medium text-neutral-200 leading-snug">
+                      {clip.hook_line}
+                    </p>
+                  </div>
+                  <div className="shrink-0 mt-1">
+                    {expandedClip === clip.clip_number ? (
+                      <ChevronUp size={14} className="text-neutral-500" />
+                    ) : (
+                      <ChevronDown size={14} className="text-neutral-500" />
+                    )}
+                  </div>
+                </button>
+
+                {expandedClip === clip.clip_number && (
+                  <div className="border-t border-neutral-800 px-4 pb-5 pt-4 space-y-5">
+                    {/* Transcript excerpt */}
+                    <div>
+                      <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                        Transcript
+                      </p>
+                      <div className="rounded-md border border-neutral-800/60 bg-neutral-950/50 px-4 py-3">
+                        <pre className="whitespace-pre-wrap font-[family-name:var(--font-geist-mono)] text-[12px] leading-relaxed text-neutral-400">
+                          {clip.transcript_excerpt}
+                        </pre>
+                      </div>
+                    </div>
+
+                    {/* X/Twitter post */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Twitter size={12} className="text-neutral-400" />
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            X / Twitter
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); copyText(clip.x_post); }}
+                            className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                          >
+                            {copiedText === clip.x_post ? <><Check size={10} className="text-green-400" /> Copied</> : <><Copy size={10} /> Copy</>}
+                          </button>
+                          {postedClips[`${clip.clip_number}-x`] ? (
+                            <span className="flex items-center gap-1 text-[10px] text-green-400"><Check size={10} /> Queued</span>
+                          ) : (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); postToTypefully(clip.x_post, "x", `${clip.clip_number}-x`); }}
+                              disabled={postingClip === `${clip.clip_number}-x`}
+                              className="flex items-center gap-1 rounded bg-neutral-800 px-2 py-0.5 text-[10px] font-medium text-neutral-300 hover:bg-neutral-700 disabled:opacity-40 transition-colors"
+                            >
+                              {postingClip === `${clip.clip_number}-x` ? <Loader2 size={10} className="animate-spin" /> : <Send size={10} />}
+                              Queue to X
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-neutral-800/60 px-3 py-2.5">
+                        <p className="text-[13px] text-neutral-300">{clip.x_post}</p>
+                      </div>
+                    </div>
+
+                    {/* LinkedIn post */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Linkedin size={12} className="text-blue-400" />
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            LinkedIn
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); copyText(clip.linkedin_post); }}
+                            className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                          >
+                            {copiedText === clip.linkedin_post ? <><Check size={10} className="text-green-400" /> Copied</> : <><Copy size={10} /> Copy</>}
+                          </button>
+                          {postedClips[`${clip.clip_number}-li`] ? (
+                            <span className="flex items-center gap-1 text-[10px] text-green-400"><Check size={10} /> Queued</span>
+                          ) : (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); postToTypefully(clip.linkedin_post, "linkedin", `${clip.clip_number}-li`); }}
+                              disabled={postingClip === `${clip.clip_number}-li`}
+                              className="flex items-center gap-1 rounded bg-blue-900/30 px-2 py-0.5 text-[10px] font-medium text-blue-300 hover:bg-blue-900/50 disabled:opacity-40 transition-colors"
+                            >
+                              {postingClip === `${clip.clip_number}-li` ? <Loader2 size={10} className="animate-spin" /> : <Send size={10} />}
+                              Queue to LinkedIn
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-neutral-800/60 px-3 py-2.5">
+                        <pre className="whitespace-pre-wrap text-[12px] leading-relaxed text-neutral-400">
+                          {clip.linkedin_post}
+                        </pre>
+                      </div>
+                    </div>
+
+                    {/* Shorts description */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Play size={12} className="text-red-400" />
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            YouTube Shorts
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); copyText(clip.shorts_description); }}
+                          className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                        >
+                          {copiedText === clip.shorts_description ? <><Check size={10} className="text-green-400" /> Copied</> : <><Copy size={10} /> Copy</>}
+                        </button>
+                      </div>
+                      <div className="rounded-md border border-neutral-800/60 px-3 py-2.5">
+                        <p className="text-[12px] text-neutral-400">{clip.shorts_description}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function DominatePage() {
@@ -910,7 +1795,7 @@ export default function DominatePage() {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [storedPassword, setStoredPassword] = useState("");
-  const [activeTab, setActiveTab] = useState<Tab>("generate");
+  const [activeTab, setActiveTab] = useState<Tab>("signals");
 
   useEffect(() => {
     const saved = sessionStorage.getItem("dominate_pw");
@@ -957,6 +1842,8 @@ export default function DominatePage() {
   }
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+    { id: "signals", label: "Signals", icon: Radar },
+    { id: "clips", label: "Clips", icon: Scissors },
     { id: "generate", label: "Generate", icon: Rocket },
     { id: "metrics", label: "Metrics", icon: TrendingUp },
     { id: "calendar", label: "Calendar", icon: Calendar },
@@ -992,6 +1879,8 @@ export default function DominatePage() {
       </div>
 
       {/* Tab content */}
+      {activeTab === "signals" && <SignalsTab storedPassword={storedPassword} />}
+      {activeTab === "clips" && <ClipsTab storedPassword={storedPassword} />}
       {activeTab === "generate" && <GenerateTab storedPassword={storedPassword} />}
       {activeTab === "metrics" && <MetricsTab />}
       {activeTab === "calendar" && <CalendarTab />}
