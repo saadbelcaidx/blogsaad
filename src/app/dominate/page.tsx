@@ -313,6 +313,9 @@ function GenerateTab({ storedPassword }: { storedPassword: string }) {
       if (socialRes.ok) {
         const socialData = await socialRes.json();
         socialContent = socialData.socialContent;
+      } else {
+        const errData = await socialRes.json().catch(() => ({}));
+        setError(errData.error || `Social generation failed (${socialRes.status})`);
       }
 
       const data = { ...blogData, socialContent };
