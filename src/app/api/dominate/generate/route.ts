@@ -74,6 +74,27 @@ category: "Market Philosophy"
 
 Do NOT wrap in code blocks. Output raw .mdx directly.`;
 
+const SOCIAL_SYSTEM_PROMPT = `${VOICE_GUIDE}
+
+Generate social content atomized from this blog post.
+
+LINKEDIN (3 posts):
+- Monday: Market Philosophy (300 words) — main thesis
+- Wednesday: Mechanism/platform angle (250 words)
+- Friday: Platform Evolution (200 words)
+Format with ### Monday, ### Wednesday, ### Friday headers.
+
+X/TWITTER (7 posts):
+- Saturday: Blog promo tweet (2 lines + link placeholder)
+- Sunday: Personal/reflection tweet (Tangier, the descent, journey)
+- Monday: Single insight tweet (max 280 chars)
+- Tuesday: Full 10-tweet thread (Hook + 8 expansion tweets + CTA)
+- Wednesday: Single insight tweet
+- Thursday: Member win tweet (reference Jai+Beau or real wins)
+- Friday: Platform vision tweet
+Format with ### Saturday, ### Sunday etc headers. Thread tweets numbered 1/ through 10/.
+
+Output LinkedIn section first under ## LINKEDIN, then X under ## X / TWITTER.`;
 
 async function fetchTranscript(videoId: string): Promise<string> {
   const apiKey = process.env.SUPADATA_API_KEY;
@@ -131,7 +152,7 @@ function escapeJsxBraces(mdx: string): string {
     if (inner.includes("(") || inner.includes("=>")) return match;
     return `\\{${inner}\\}`;
   });
-  return `---${parts[1]}---${escaped}`;
+  return `---${parts[1]}---\n${escaped}`;
 }
 
 export async function POST(request: NextRequest) {
@@ -208,6 +229,10 @@ export async function POST(request: NextRequest) {
     ];
   }
 
+  let mdxContent: string;
+  let slug: string;
+  let title: string;
+
   try {
     const blogRes = await client.chat.completions.create({
       model: process.env.AZURE_OPENAI_DEPLOYMENT!,
@@ -216,14 +241,34 @@ export async function POST(request: NextRequest) {
       max_tokens: 4000,
     });
 
-    let mdxContent = blogRes.choices[0].message.content?.trim() || "";
+    mdxContent = blogRes.choices[0].message.content?.trim() || "";
     mdxContent = escapeJsxBraces(mdxContent);
-    const slug = extractSlug(mdxContent);
-    const title = extractTitle(mdxContent);
-
-    return NextResponse.json({ slug, title, mdxContent });
+    slug = extractSlug(mdxContent);
+    title = extractTitle(mdxContent);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: `Blog generation failed: ${msg}` }, { status: 500 });
   }
+
+  // Generate social content — if this fails, still return the blog
+  let socialContent = "";
+  try {
+    const blogBody = mdxContent.replace(/^---[\s\S]*?---\n/, "").trim();
+
+    const socialRes = await client.chat.completions.create({
+      model: process.env.AZURE_OPENAI_DEPLOYMENT!,
+      messages: [
+        { role: "system", content: SOCIAL_SYSTEM_PROMPT },
+        { role: "user", content: `Blog title: "${title}"\n\nBlog content:\n\n${blogBody}\n\nGenerate the full week of social content.` },
+      ],
+      temperature: 0.7,
+      max_tokens: 5000,
+    });
+
+    socialContent = socialRes.choices[0].message.content?.trim() || "";
+  } catch {
+    // Social failed but blog succeeded — return blog without social
+  }
+
+  return NextResponse.json({ slug, title, mdxContent, socialContent });
 }

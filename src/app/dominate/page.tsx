@@ -286,7 +286,7 @@ function GenerateTab({ storedPassword }: { storedPassword: string }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || `Blog generation failed (${res.status})`);
+        setError(data.error || `Generation failed (${res.status})`);
         setStep("idle");
         if (mode === "youtube" && !ytTranscript.trim()) {
           setShowYtFallback(true);
@@ -294,33 +294,11 @@ function GenerateTab({ storedPassword }: { storedPassword: string }) {
         return;
       }
 
-      const blogData = await res.json();
-
-      // Step 2: Generate social content from the blog
       setStep("social");
+      const data = await res.json();
 
-      const blogBody = blogData.mdxContent.replace(/^---[\s\S]*?---\n/, "").trim();
-      const socialRes = await fetch("/api/dominate/generate-social", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-dominate-password": storedPassword,
-        },
-        body: JSON.stringify({ title: blogData.title, blogBody }),
-      });
-
-      let socialContent = "";
-      if (socialRes.ok) {
-        const socialData = await socialRes.json();
-        socialContent = socialData.socialContent;
-      } else {
-        const errData = await socialRes.json().catch(() => ({}));
-        setError(errData.error || `Social generation failed (${socialRes.status})`);
-      }
-
-      const data = { ...blogData, socialContent };
       setResult(data);
-      setSocialSections(parseSocial(socialContent));
+      setSocialSections(parseSocial(data.socialContent));
       setStep("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed. Try again.");
