@@ -297,6 +297,10 @@ function GenerateTab({ storedPassword }: { storedPassword: string }) {
       setStep("social");
       const data = await res.json();
 
+      if (data.socialError) {
+        setError(`Social generation failed: ${data.socialError}`);
+      }
+
       setResult(data);
       setSocialSections(parseSocial(data.socialContent));
       setStep("done");

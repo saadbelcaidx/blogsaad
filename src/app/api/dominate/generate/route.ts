@@ -266,8 +266,10 @@ export async function POST(request: NextRequest) {
     });
 
     socialContent = socialRes.choices[0].message.content?.trim() || "";
-  } catch {
-    // Social failed but blog succeeded — return blog without social
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    // Return blog with the social error so frontend can show it
+    return NextResponse.json({ slug, title, mdxContent, socialContent: "", socialError: msg });
   }
 
   return NextResponse.json({ slug, title, mdxContent, socialContent });
