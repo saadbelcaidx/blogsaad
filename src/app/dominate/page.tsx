@@ -940,6 +940,7 @@ interface GeneratedScript {
   titles: string[];
   thumbnails: string[];
   script: {
+    proof_shot?: string;
     hook: string;
     setup: string;
     insight: string;
@@ -1000,6 +1001,45 @@ function SignalsTab({ storedPassword }: { storedPassword: string }) {
   const [generatedScripts, setGeneratedScripts] = useState<Record<number, GeneratedScript>>({});
   const [scriptError, setScriptError] = useState("");
   const [activeScriptSection, setActiveScriptSection] = useState<string>("hook");
+
+  // Dump idea state
+  const [ideaDump, setIdeaDump] = useState("");
+  const [dumpingIdea, setDumpingIdea] = useState(false);
+  const [dumpedScript, setDumpedScript] = useState<GeneratedScript | null>(null);
+  const [dumpError, setDumpError] = useState("");
+  const [dumpScriptSection, setDumpScriptSection] = useState<string>("hook");
+
+  const generateFromIdea = async () => {
+    if (!ideaDump.trim()) return;
+    setDumpingIdea(true);
+    setDumpError("");
+    setDumpedScript(null);
+
+    try {
+      const res = await fetch("/api/dominate/script", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-dominate-password": storedPassword,
+        },
+        body: JSON.stringify({ idea: ideaDump }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setDumpError(data.error || "Script generation failed.");
+        setDumpingIdea(false);
+        return;
+      }
+
+      setDumpedScript(data);
+      setDumpScriptSection("hook");
+    } catch {
+      setDumpError("Request failed. Try again.");
+    } finally {
+      setDumpingIdea(false);
+    }
+  };
 
   // Config
   const [showConfig, setShowConfig] = useState(false);
@@ -1111,10 +1151,152 @@ function SignalsTab({ storedPassword }: { storedPassword: string }) {
   return (
     <div>
       <div className="mb-6">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Signal Miner</p>
+        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Signal Miner + Script Generator</p>
         <p className="mt-0.5 text-[13px] text-neutral-500">
-          Mine Reddit + YouTube for audience pain signals. Get scored video ideas with ready-to-use titles.
+          Mine signals from Reddit/YouTube or dump a video idea. Get hook + full script with your strategy baked in.
         </p>
+      </div>
+
+      {/* Dump idea section */}
+      <div className="mb-8 rounded-lg border border-neutral-800 bg-neutral-900/40 p-4">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-3">
+          Dump Video Idea
+        </p>
+        <textarea
+          value={ideaDump}
+          onChange={(e) => { setIdeaDump(e.target.value); setDumpedScript(null); setDumpError(""); }}
+          placeholder="What's the video about? e.g. 'Show how I launch campaigns on both sides in Connector OS and get replies in minutes' or 'Why cold email agencies are dying and what to do instead'..."
+          rows={3}
+          className="w-full resize-none bg-transparent text-[14px] leading-relaxed text-neutral-200 placeholder-neutral-600 outline-none mb-3"
+        />
+        <button
+          onClick={generateFromIdea}
+          disabled={dumpingIdea || !ideaDump.trim()}
+          className="flex items-center gap-2 rounded-md bg-neutral-100 px-5 py-2.5 text-[13px] font-semibold text-neutral-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {dumpingIdea ? (
+            <><Loader2 size={14} className="animate-spin" /> Generating hook + script...</>
+          ) : (
+            <><Clapperboard size={14} /> Generate Script</>
+          )}
+        </button>
+
+        {dumpError && (
+          <div className="mt-3 rounded-md border border-red-900/50 bg-red-950/30 px-3 py-2 text-[12px] text-red-400">
+            {dumpError}
+          </div>
+        )}
+
+        {/* Dumped script result */}
+        {dumpedScript && (
+          <div className="mt-5 border-t border-neutral-800/60 pt-5 space-y-4">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-green-400">
+              Script Generated — {dumpedScript.estimated_length} • {dumpedScript.hook_type} hook
+            </p>
+
+            {/* Proof shot */}
+            {dumpedScript.script.proof_shot && (
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                  Proof Shot (first 3-5 seconds)
+                </p>
+                <div className="rounded-md border border-amber-800/40 bg-amber-950/20 px-4 py-3">
+                  <pre className="whitespace-pre-wrap font-[family-name:var(--font-geist-mono)] text-[12px] leading-relaxed text-amber-300">
+                    {dumpedScript.script.proof_shot}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {/* Title variants */}
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                15 Title Variants
+              </p>
+              <div className="space-y-1 max-h-48 overflow-y-auto">
+                {dumpedScript.titles.map((t, tIdx) => (
+                  <div key={tIdx} className="group flex items-center justify-between rounded-md border border-neutral-800/60 px-3 py-2 hover:border-neutral-700 transition-colors">
+                    <span className="text-[12px] text-neutral-300">{t}</span>
+                    <button
+                      onClick={() => copyTitle(t)}
+                      className="shrink-0 ml-2 flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                    >
+                      {copiedTitle === t ? <><Check size={10} className="text-green-400" /> Copied</> : <><Copy size={10} /> Copy</>}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Thumbnail text */}
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                Thumbnail Text
+              </p>
+              <div className="flex gap-2">
+                {dumpedScript.thumbnails.map((thumb, tIdx) => (
+                  <div key={tIdx} className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-[13px] font-bold text-neutral-100 uppercase tracking-wide">
+                    {thumb}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Script sections */}
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                Full Script
+              </p>
+              <div className="flex gap-1 mb-3 flex-wrap">
+                {(["hook", "setup", "insight", "framework", "proof", "cta"] as const).map((section) => (
+                  <button
+                    key={section}
+                    onClick={() => setDumpScriptSection(section)}
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider transition-colors ${
+                      dumpScriptSection === section
+                        ? "bg-neutral-700 text-neutral-100"
+                        : "text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                    }`}
+                  >
+                    {section}
+                  </button>
+                ))}
+              </div>
+              <div className="rounded-md border border-neutral-800/60 bg-neutral-950/50 px-4 py-3">
+                <div className="flex justify-end mb-2">
+                  <CopyButton text={dumpedScript.script[dumpScriptSection as keyof typeof dumpedScript.script] ?? ""} />
+                </div>
+                <pre className="whitespace-pre-wrap font-[family-name:var(--font-geist-mono)] text-[12px] leading-relaxed text-neutral-400">
+                  {dumpedScript.script[dumpScriptSection as keyof typeof dumpedScript.script] ?? ""}
+                </pre>
+              </div>
+            </div>
+
+            {/* B-roll */}
+            {dumpedScript.broll.length > 0 && (
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-2">
+                  B-Roll Suggestions
+                </p>
+                <div className="space-y-1">
+                  {dumpedScript.broll.map((br, bIdx) => (
+                    <div key={bIdx} className="flex items-start gap-2 text-[12px] text-neutral-400">
+                      <Film size={11} className="mt-0.5 shrink-0 text-neutral-600" />
+                      {br}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="mb-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-neutral-800/60" />
+        <span className="text-[11px] text-neutral-600 uppercase tracking-wider">or mine signals</span>
+        <div className="h-px flex-1 bg-neutral-800/60" />
       </div>
 
       {/* Config toggle */}
