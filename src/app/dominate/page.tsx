@@ -36,7 +36,7 @@ import {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Tab = "generate" | "metrics" | "calendar" | "autopost" | "signals" | "clips";
+type Tab = "generate" | "metrics" | "calendar" | "autopost" | "signals" | "clips" | "thumbnails";
 type Mode = "youtube" | "text" | "image";
 type Step =
   | "idle"
@@ -227,6 +227,221 @@ function MetricBar({ label, icon: Icon, color, value, goal, unit = "" }: {
           style={{ width: `${pct}%` }}
         />
       </div>
+    </div>
+  );
+}
+
+// ─── Thumbnails Tab ──────────────────────────────────────────────────────────
+
+const THUMB_BACKGROUNDS = [
+  { id: "dark-wood", label: "Dark Wood", prompt: "dark moody wood-panel background" },
+  { id: "studio", label: "Studio", prompt: "clean dark gradient background, soft professional studio lighting" },
+  { id: "cinematic", label: "Cinematic", prompt: "dark textured background with subtle warm glow, cinematic rim lighting" },
+  { id: "office", label: "Luxury Office", prompt: "dark luxury office background, mahogany desk, dim ambient lighting" },
+  { id: "neon", label: "Neon", prompt: "dark background with neon blue and purple accent lighting, cyberpunk feel" },
+  { id: "red-black", label: "Red & Black", prompt: "bold red and black gradient background, dramatic contrast lighting" },
+  { id: "green-money", label: "Money Green", prompt: "dark green-tinted background, subtle cash and revenue vibes" },
+  { id: "outdoor", label: "Outdoor", prompt: "outdoor urban rooftop background, golden hour sunset lighting, city skyline" },
+  { id: "gym", label: "Gym", prompt: "dark industrial gym background, moody overhead lighting" },
+  { id: "concrete", label: "Concrete", prompt: "raw concrete wall background, harsh directional lighting, underground vibe" },
+  { id: "dashboard", label: "Dashboard", prompt: "revenue dashboard and stripe notifications faintly visible behind, dark background" },
+  { id: "whiteboard", label: "Whiteboard", prompt: "dark room with whiteboard covered in diagrams and numbers behind" },
+];
+
+const THUMB_OUTFITS = [
+  { id: "turtleneck", label: "Turtleneck", prompt: "wearing black turtleneck" },
+  { id: "tshirt", label: "T-Shirt", prompt: "wearing black crew-neck t-shirt" },
+  { id: "hoodie", label: "Hoodie", prompt: "wearing black hoodie" },
+  { id: "leather", label: "Leather Jacket", prompt: "wearing black leather jacket" },
+  { id: "suit", label: "Suit", prompt: "wearing sharp black suit with open collar, no tie" },
+  { id: "dress-shirt", label: "Dress Shirt", prompt: "wearing crisp white dress shirt, sleeves rolled up" },
+  { id: "tank", label: "Tank Top", prompt: "wearing black tank top, athletic build" },
+];
+
+const THUMB_EXPRESSIONS = [
+  { id: "serious", label: "Serious", prompt: "serious confident expression, looking straight at camera" },
+  { id: "thinking", label: "Thinking", prompt: "hand on chin thoughtfully, intense focused expression" },
+  { id: "knowing", label: "Knowing", prompt: "confident knowing smirk, one eyebrow slightly raised" },
+  { id: "shocked", label: "Shocked", prompt: "shocked surprised expression, mouth slightly open, wide eyes" },
+  { id: "intense", label: "Intense", prompt: "intense piercing stare, jaw clenched, powerful energy" },
+  { id: "calm", label: "Calm", prompt: "calm composed expression, quiet confidence, direct eye contact" },
+  { id: "angry", label: "Angry", prompt: "frustrated angry expression, furrowed brows, confrontational energy" },
+  { id: "excited", label: "Excited", prompt: "energetic excited expression, leaning slightly forward, eyes lit up" },
+];
+
+const THUMB_PROPS = [
+  { id: "none", label: "None", prompt: "" },
+  { id: "cash", label: "Cash Stack", prompt: "holding a thick stack of cash" },
+  { id: "laptop", label: "Laptop", prompt: "holding open laptop showing charts" },
+  { id: "phone", label: "Phone", prompt: "holding phone showing notifications" },
+  { id: "pointing", label: "Pointing", prompt: "pointing finger directly at camera" },
+  { id: "arms-crossed", label: "Arms Crossed", prompt: "arms crossed confidently" },
+  { id: "fist", label: "Fist Up", prompt: "fist raised in determination" },
+  { id: "hands-up", label: "Hands Up", prompt: "both hands up showing disbelief" },
+];
+
+function ThumbPicker({ label, options, selected, onSelect }: {
+  label: string;
+  options: { id: string; label: string }[];
+  selected: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div className="mb-4">
+      <label className="mb-2 block text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+        {label}
+      </label>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((o) => (
+          <button
+            key={o.id}
+            onClick={() => onSelect(o.id)}
+            className={`rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-colors ${
+              selected === o.id
+                ? "bg-neutral-800 text-neutral-100 ring-1 ring-neutral-600"
+                : "text-neutral-500 hover:bg-neutral-900 hover:text-neutral-300"
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ThumbnailsTab({ storedPassword }: { storedPassword: string }) {
+  const [text, setText] = useState("");
+  const [bg, setBg] = useState("dark-wood");
+  const [outfit, setOutfit] = useState("turtleneck");
+  const [expression, setExpression] = useState("serious");
+  const [prop, setProp] = useState("none");
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState("");
+  const [images, setImages] = useState<{ src: string; size: string }[]>([]);
+
+  const generate = async () => {
+    setGenerating(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/dominate/thumbnail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-dominate-password": storedPassword,
+        },
+        body: JSON.stringify({
+          text: text.trim(),
+          method: "lora",
+          parts: { bg, outfit, expression, prop },
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to generate thumbnail.");
+        return;
+      }
+
+      setImages((prev) => [{ src: data.image, size: data.size }, ...prev]);
+    } catch {
+      setError("Request failed. Try again.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const download = (src: string, index: number) => {
+    const a = document.createElement("a");
+    a.href = src;
+    a.download = `thumb-${Date.now()}-${index + 1}.jpg`;
+    a.click();
+  };
+
+  // Count combinations
+  const combos = THUMB_BACKGROUNDS.length * THUMB_OUTFITS.length * THUMB_EXPRESSIONS.length * THUMB_PROPS.length;
+
+  return (
+    <div>
+      <div className="mb-6">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">Thumbnails</p>
+        <p className="mt-0.5 text-[13px] text-neutral-500">
+          Mix and match to generate thumbnails. {combos.toLocaleString()} combinations. ~$0.03 per image.
+        </p>
+      </div>
+
+      {/* Text input */}
+      <div className="rounded-lg border border-neutral-800 bg-neutral-900/40 p-4 mb-5">
+        <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+          Thumbnail Text
+        </label>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder='e.g. THE $192K PLAYBOOK'
+          className="w-full bg-transparent text-[16px] font-semibold text-neutral-100 placeholder-neutral-600 outline-none"
+        />
+        <p className="mt-1.5 text-[11px] text-neutral-600">
+          Use \n for line breaks. Leave empty for no text overlay.
+        </p>
+      </div>
+
+      {/* Pickers */}
+      <ThumbPicker label="Background" options={THUMB_BACKGROUNDS} selected={bg} onSelect={setBg} />
+      <ThumbPicker label="Outfit" options={THUMB_OUTFITS} selected={outfit} onSelect={setOutfit} />
+      <ThumbPicker label="Expression" options={THUMB_EXPRESSIONS} selected={expression} onSelect={setExpression} />
+      <ThumbPicker label="Props" options={THUMB_PROPS} selected={prop} onSelect={setProp} />
+
+      {/* Generate button */}
+      <button
+        onClick={generate}
+        disabled={generating}
+        className="mt-2 flex items-center gap-2 rounded-md bg-neutral-100 px-5 py-2.5 text-[13px] font-semibold text-neutral-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {generating ? (
+          <><Loader2 size={14} className="animate-spin" /> Generating thumbnail...</>
+        ) : (
+          <><ImageIcon size={14} /> Generate Thumbnail</>
+        )}
+      </button>
+
+      {/* Error */}
+      {error && (
+        <div className="mt-4 rounded-md border border-red-900/50 bg-red-950/30 px-4 py-3 text-[13px] text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Generated images */}
+      {images.length > 0 && (
+        <div className="mt-6 space-y-4">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+            Generated ({images.length})
+          </p>
+          {images.map((img, i) => (
+            <div key={i} className="rounded-lg border border-neutral-800 bg-neutral-900/40 overflow-hidden">
+              <img
+                src={img.src}
+                alt={`Thumbnail ${i + 1}`}
+                className="w-full"
+              />
+              <div className="flex items-center justify-between px-4 py-2 border-t border-neutral-800/60">
+                <span className="text-[11px] text-neutral-500 font-[family-name:var(--font-geist-mono)]">
+                  1280x720 &middot; {img.size}
+                </span>
+                <button
+                  onClick={() => download(img.src, i)}
+                  className="rounded-md px-3 py-1 text-[11px] font-medium text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-neutral-200"
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -2035,6 +2250,7 @@ export default function DominatePage() {
     { id: "metrics", label: "Metrics", icon: TrendingUp },
     { id: "calendar", label: "Calendar", icon: Calendar },
     { id: "autopost", label: "Auto-Post", icon: Send },
+    { id: "thumbnails", label: "Thumbnails", icon: ImageIcon },
   ];
 
   return (
@@ -2072,6 +2288,7 @@ export default function DominatePage() {
       {activeTab === "metrics" && <MetricsTab />}
       {activeTab === "calendar" && <CalendarTab />}
       {activeTab === "autopost" && <AutoPostTab storedPassword={storedPassword} />}
+      {activeTab === "thumbnails" && <ThumbnailsTab storedPassword={storedPassword} />}
     </div>
   );
 }

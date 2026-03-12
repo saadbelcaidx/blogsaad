@@ -10,9 +10,12 @@
     "lint": "eslint",
     "atomize": "node atomize.js",
     "yt": "node yt-to-blog.js",
-    "dump": "node dump-to-blog.js"
+    "dump": "node dump-to-blog.js",
+    "thumb": "node thumbnail.js",
+    "train": "node train-lora.js"
   },
   "dependencies": {
+    "archiver": "^7.0.1",
     "dotenv": "^17.2.4",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.563.0",
@@ -22,6 +25,8 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "reading-time": "^1.5.0",
+    "replicate": "^1.4.0",
+    "sharp": "^0.34.5",
     "youtube-captions-scraper": "^2.0.3",
     "youtube-transcript": "^1.2.1",
     "youtubei.js": "^16.0.1"
