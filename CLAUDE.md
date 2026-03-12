@@ -199,6 +199,93 @@ Daily: X/Twitter (threads, single tweets, insights)
 
 ---
 
+## THUMBNAIL GENERATION SYSTEM
+
+Saad built a custom AI thumbnail generator to replace Pikzels. It uses a trained LoRA model of his face on Replicate. Everything lives in this repo.
+
+### Architecture
+
+| File | Purpose |
+|---|---|
+| `thumbnail.js` | CLI tool: `npm run thumb -- "TEXT" --method lora --style dark` |
+| `train-lora.js` | Trains the LoRA model: `npm run train` (~9 min, ~$3-5 one-time) |
+| `src/app/api/dominate/thumbnail/route.ts` | API route for the web UI (Dominate dashboard) |
+| `.lora-config.json` | Stores trained model version — DO NOT DELETE |
+| `public/face-ref.jpg` | Primary face reference (front-facing selfie) |
+| `public/face-ref-2.png` | Secondary face ref (thinking pose) |
+| `public/face-ref-3.jpg` | Tertiary face ref (needs EXIF rotation) |
+
+### Trained Model
+
+- **Replicate model:** `saadbelcaidx/saad-face`
+- **Version:** stored in `.lora-config.json`
+- **Trigger word:** `SAAD` (use this in prompts to activate face identity)
+- **Trained on:** 4 real photos + 10 YouTube thumbnails (right-cropped to isolate face)
+- **Trainer:** `ostris/flux-dev-lora-trainer` version `26dce37a...`
+- **Replicate account:** `saadbelcaidx` (API token in `.env` as `REPLICATE_API_TOKEN`)
+
+### Three Generation Methods
+
+1. **`lora`** (default, best quality) — Single API call using trained LoRA. ~$0.02/image. No face reference needed — face is baked into the model.
+2. **`pulid`** — Single-step face injection via `bytedance/flux-pulid`. Uses `face-ref.jpg`. ~$0.02/image. Decent but less consistent.
+3. **`swap`** — Two-step: `black-forest-labs/flux-1.1-pro` generates base image + `codeplugtech/face-swap` swaps face. ~$0.04/image. Good for specific compositions.
+
+### Style Presets
+
+`dark`, `clean`, `dramatic`, `proof`, `hype` — defined in both `thumbnail.js` and the API route.
+
+The Dominate web UI has granular mix-and-match controls: background, outfit, expression, prop.
+
+### Cost Breakdown
+
+| Item | Cost |
+|---|---|
+| LoRA training (one-time) | ~$3-5 |
+| Per thumbnail (lora method) | ~$0.02 |
+| Per thumbnail (swap method) | ~$0.04 |
+| 30 thumbnails/month | ~$0.60 |
+| Replicate credit loaded | $200 (covers ~10,000 thumbnails) |
+
+### If Something Breaks
+
+**Replicate is down:** Switch to `--method swap` or `--method pulid` — these use different models and may still work. Or just wait; Replicate outages are rare and short.
+
+**Model stops working / gets deprecated:** Retrain. All training images are either in `public/` (face refs) or auto-downloaded from YouTube in `train-lora.js`. Just run:
+```
+npm run train
+```
+Takes ~9 minutes, costs ~$3-5. Writes a new `.lora-config.json` automatically.
+
+**If interrupted during training:** Resume with:
+```
+node train-lora.js --poll <training_id>
+```
+The training ID is printed when training starts.
+
+**Replicate shuts down entirely:** The face-swap method uses multiple independent models. Worst case, swap out the model names in `thumbnail.js` for alternatives on FAL.ai or another provider. The architecture (generate base → swap face → overlay text) works with any image API.
+
+**Training images source:**
+- 4 real photos in `public/` (face-ref.jpg, face-ref-2.png, face-ref-3.jpg, saad.jpg)
+- 10 YouTube thumbnails downloaded by video ID in `train-lora.js` (right 60% cropped to isolate face, removing text overlays)
+- Skipped 4 Pikzels AI-generated thumbnails (97KiKqYxhFc, SIdnK7n9kV0, GpkivoG0tG0, 0Us7H2A2qA0) — would confuse the model
+
+### CLI Usage
+
+```bash
+# Generate thumbnails (default: 2 variations, lora method, dark style)
+npm run thumb -- "THE $192K PLAYBOOK"
+npm run thumb -- "F*CK LIMITING\nBELIEFS" --style clean
+npm run thumb -- "COLD OPERATOR" --method lora --style dramatic --count 3
+npm run thumb -- --no-text --style dark --count 1
+
+# Retrain the model (if needed)
+npm run train
+```
+
+Output goes to `thumbnails/` folder. The Dominate web UI at `/dominate` → Thumbnails tab also generates via the API route.
+
+---
+
 ## HOW TO USE CLAUDE IN THIS PROJECT
 
 When Saad says "write this week's blog" or "atomize this post":
