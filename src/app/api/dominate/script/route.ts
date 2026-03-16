@@ -8,10 +8,7 @@ const DOMINATE_PASSWORD = process.env.DOMINATE_PASSWORD ?? "";
 
 function getClient() {
   return new OpenAI({
-    apiKey: process.env.AZURE_OPENAI_API_KEY ?? "",
-    baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}`,
-    defaultQuery: { "api-version": "2024-02-01" },
-    defaultHeaders: { "api-key": process.env.AZURE_OPENAI_API_KEY ?? "" },
+    apiKey: process.env.OPENAI_API_KEY ?? "",
   });
 }
 
@@ -245,7 +242,7 @@ Generate the full script package.`;
     }
 
     const response = await client.chat.completions.create({
-      model: process.env.AZURE_OPENAI_DEPLOYMENT ?? "gpt-4o",
+      model: "gpt-4o",
       messages: [
         { role: "system", content: SCRIPT_PROMPT },
         { role: "user", content: userPrompt },
