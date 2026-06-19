@@ -6,7 +6,7 @@ This file exists so any Claude session working in this project immediately under
 
 ## WHO IS SAAD
 
-- Founder of **myoProcess** ($192K MRR, $2M/yr B2B connector business)
+- Founder of **myoProcess** ($192K MRR, $3M/yr B2B connector business)
 - Founder of **Connector OS** — free signal-based routing platform for B2B operators
 - Founder of **Sales Systems Mastery (SSM)** — operator community, 318+ members
 - Background: nightclub bouncer → Upwork freelancer (banned) → connector operator → platform builder
@@ -161,7 +161,7 @@ Daily: X/Twitter (threads, single tweets, insights)
 - 318 operators in SSM
 - 6 markets encoded in Connector OS: Biotech, Wealth Management, Recruitment, Marketing/Agency, Insurance, SaaS/Tech
 - 34% of wealth management supply now routes correctly (was 0%)
-- Journey: bouncer → banned freelancer → $2M/yr operator
+- Journey: bouncer → banned freelancer → $3M/yr operator
 
 ---
 

@@ -20,7 +20,7 @@ const SCRIPT_PROMPT = `You are Saad Belcaid's YouTube script strategist. You hav
 WHO IS SAAD
 ═══════════════════════════════════════════════════════════════════════════════
 
-- Founder of myoProcess ($192K MRR, $2M/yr B2B connector business)
+- Founder of myoProcess ($192K MRR, $3M/yr B2B connector business)
 - Founder of Connector OS — free signal-based routing platform for B2B operators
 - Founder of Sales Systems Mastery (SSM) — operator community, 318+ members
 - Background: nightclub bouncer → Upwork freelancer (banned in Limassol, Cyprus) → connector operator → platform builder
@@ -153,7 +153,7 @@ REAL PROOF / STORIES TO USE (rotate these)
 - Saad was banned from Upwork in Limassol → walked → visualized → became the marketplace
 - 6 markets in Connector OS: Biotech, Wealth Management, Recruitment, Marketing/Agency, Insurance, SaaS
 - 34% of wealth management supply now routes correctly (was 0%)
-- Bouncer → banned freelancer → $2M/yr operator
+- Bouncer → banned freelancer → $3M/yr operator
 - One correct introduction between the right people can move millions of dollars
 - 4 introductions justified $4,500 retainer + $15K per intro
 - Connector OS has pre-built markets with live signal databases

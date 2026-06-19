@@ -63,7 +63,7 @@ REAL METRICS TO USE (pick what's relevant):
 - 318 operators in SSM
 - 6 encoded markets: Biotech, Wealth Management, Recruitment, Marketing/Agency, Insurance, SaaS/Tech
 - 34% of wealth management supply now routes correctly (was 0%)
-- Bouncer → banned Upwork freelancer → $2M/yr operator
+- Bouncer → banned Upwork freelancer → $3M/yr operator
 - N²/2 = 50,653 potential connections between 318 members
 
 CONTENT PILLARS:

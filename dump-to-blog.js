@@ -64,7 +64,7 @@ REAL METRICS TO USE (when relevant):
 - 6 encoded markets: Biotech, Wealth Management, Recruitment, Marketing/Agency, Insurance, SaaS/Tech
 - 34% of wealth management supply now routes correctly (was 0%)
 - N²/2 = 50,653 potential connections between 318 members
-- bouncer → banned Upwork freelancer → $2M/yr operator
+- bouncer → banned Upwork freelancer → $3M/yr operator
 
 WHAT HE NEVER DOES:
 - No "in this post I'll cover..."

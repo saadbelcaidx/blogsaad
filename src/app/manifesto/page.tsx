@@ -3,11 +3,11 @@ import { Newsletter } from "@/components/newsletter";
 
 export const metadata: Metadata = {
   title: "The Connector Manifesto — Saad Belcaid",
-  description: "How to build a $2M/yr connector business without getting lucky. 18 principles. This is the doctrine.",
+  description: "How to build a $3M/yr connector business without getting lucky. 18 principles. This is the doctrine.",
   metadataBase: new URL("https://saadbelcaid.me"),
   openGraph: {
     title: "The Connector Manifesto — Saad Belcaid",
-    description: "How to build a $2M/yr connector business without getting lucky. 18 principles. This is the doctrine.",
+    description: "How to build a $3M/yr connector business without getting lucky. 18 principles. This is the doctrine.",
     url: "https://saadbelcaid.me/manifesto",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     site: "@belcaidsaaad",
     creator: "@belcaidsaaad",
     title: "The Connector Manifesto — Saad Belcaid",
-    description: "How to build a $2M/yr connector business without getting lucky. 18 principles.",
+    description: "How to build a $3M/yr connector business without getting lucky. 18 principles.",
     images: ["/og-image.png"],
   },
 };
@@ -51,7 +51,7 @@ export default function ManifestoPage() {
           Doctrine
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-geist-sans)] text-2xl font-semibold tracking-tight text-neutral-100 leading-snug">
-          How to build a $2M/yr connector business
+          How to build a $3M/yr connector business
           <span className="text-neutral-500"> without getting lucky</span>
         </h1>
         <p className="mt-4 text-[13px] text-neutral-500 leading-relaxed max-w-lg">
