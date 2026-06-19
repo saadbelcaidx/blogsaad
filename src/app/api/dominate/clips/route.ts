@@ -64,7 +64,7 @@ async function fetchYouTubeTranscript(videoId: string): Promise<string | null> {
 
 // ─── Clip Analysis Prompt ────────────────────────────────────────────────────
 
-const CLIPS_PROMPT = `You are a short-form content strategist for Saad Belcaid's YouTube channel. He teaches the Connector Model — a B2B business model where operators connect companies and earn from introductions/deals. He runs a $192K MRR agency and a 318-member community.
+const CLIPS_PROMPT = `You are a short-form content strategist for Saad Belcaid's YouTube channel. He teaches the Connector Model — a B2B business model where operators connect companies and earn from introductions/deals. He runs a $201K MRR agency and a 318-member community.
 
 You will receive a full video transcript with timestamps. Your job is to identify 5-8 segments that would make viral short-form clips (YouTube Shorts, X posts, LinkedIn posts).
 
@@ -89,7 +89,7 @@ CLIP SELECTION RULES:
 - Each clip must be self-contained (makes sense without watching the full video)
 - No intro/outro fluff — cut to the meat
 - Prioritize moments where Saad sounds most natural and convicted
-- If he mentions specific numbers ($192K, 318 operators, etc.), that's always clip-worthy
+- If he mentions specific numbers ($201K, 318 operators, etc.), that's always clip-worthy
 - If he tells a personal story (Upwork ban, Limassol, Tangier), that's clip-worthy
 - If he drops a framework or mental model, that's clip-worthy
 

@@ -67,7 +67,7 @@ export default function ManifestoPage() {
             @belcaidsaaad
           </a>
           <span className="text-neutral-700">·</span>
-          <span className="text-[12px] text-neutral-500">$192K MRR · 318 operators</span>
+          <span className="text-[12px] text-neutral-500">$201K MRR · 318 operators</span>
         </div>
       </header>
 

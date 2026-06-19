@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Saad Belcaid",
     title: "Saad Belcaid — Founder of myoProcess, Connector OS & SSM",
-    description: "$192K MRR. Built with introductions, not ads. I write about how markets actually work.",
+    description: "$201K MRR. Built with introductions, not ads. I write about how markets actually work.",
     url: "https://saadbelcaid.me",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Saad Belcaid" }],
   },
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     site: "@belcaidsaaad",
     creator: "@belcaidsaaad",
     title: "Saad Belcaid — Founder of myoProcess, Connector OS & SSM",
-    description: "$192K MRR. Built with introductions, not ads. I write about how markets actually work.",
+    description: "$201K MRR. Built with introductions, not ads. I write about how markets actually work.",
     images: ["/og-image.png"],
   },
 };

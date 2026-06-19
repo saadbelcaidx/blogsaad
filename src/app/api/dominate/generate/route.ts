@@ -11,7 +11,7 @@ function getClient() {
 }
 
 const VOICE_GUIDE = `
-You are ghostwriting content for Saad Belcaid — founder of myoProcess ($192K MRR), Connector OS, and Sales Systems Mastery (318 operators).
+You are ghostwriting content for Saad Belcaid — founder of myoProcess ($201K MRR), Connector OS, and Sales Systems Mastery (318 operators).
 
 VOICE RULES:
 - First person. Direct. Honest. Sounds like a founder thinking out loud, not a copywriter.
@@ -32,7 +32,7 @@ HIS PHRASES (use naturally):
 - "encode / encoded markets" / "rented land" / "the gap" / "infinite player"
 
 REAL METRICS:
-- $192K MRR, 318 operators in SSM
+- $201K MRR, 318 operators in SSM
 - 6 encoded markets: Biotech, Wealth Management, Recruitment, Marketing/Agency, Insurance, SaaS/Tech
 - 34% of wealth management supply now routes correctly (was 0%)
 - N²/2 = 50,653 potential connections between 318 members

@@ -1,6 +1,6 @@
 // thumbnail.js
 // Usage: node thumbnail.js "YOUR TEXT HERE" [options]
-//        npm run thumb -- "THE $192K PLAYBOOK"
+//        npm run thumb -- "THE $201K PLAYBOOK"
 //        npm run thumb -- "F*CK LIMITING\nBELIEFS" --style dramatic
 //        npm run thumb -- "CHARGE BOTH" --method swap --prompt "stripe notifications behind"
 
@@ -301,11 +301,11 @@ Methods:
                      Requires: npm run train (one-time ~$3-5, ~25 min)
 
 Examples:
-  npm run thumb -- "THE \\$192K PLAYBOOK"
+  npm run thumb -- "THE \\$201K PLAYBOOK"
   npm run thumb -- "F*CK LIMITING\\nBELIEFS" --style clean
   npm run thumb -- "CHARGE BOTH\\n2026 ROADMAP" --style proof
   npm run thumb -- "COLD OPERATOR" --method swap --style dramatic
-  npm run thumb -- "THE \\$192K PLAYBOOK" --method lora --style dark
+  npm run thumb -- "THE \\$201K PLAYBOOK" --method lora --style dark
   npm run thumb -- --no-text --style dark --count 3
 `);
     process.exit(0);

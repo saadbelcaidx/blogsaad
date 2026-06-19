@@ -163,7 +163,7 @@ export default function SaadBelcaidWiki() {
           <h2>Accomplishments</h2>
           <ul>
             <li><strong>$826,745+</strong> in verified member results through SSM &rarr; <a href="/winners">Wall of Winners</a></li>
-            <li>Scaled myoProcess to <strong>$192k/month</strong> (as of February 2026)</li>
+            <li>Scaled myoProcess to <strong>$201k/month</strong> (as of February 2026)</li>
             <li><strong>300+ members</strong> in Sales Systems Mastery</li>
             <li><strong>3 years</strong> running myoProcess as a B2B connector company</li>
             <li>Created <strong>Connector OS</strong> — free software used by hundreds of operators</li>

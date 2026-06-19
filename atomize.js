@@ -19,7 +19,7 @@ const client = new OpenAI({
 });
 
 const VOICE_GUIDE = `
-You are writing content for Saad Belcaid — founder of myoProcess ($192K MRR), Connector OS, and Sales Systems Mastery (318 operators).
+You are writing content for Saad Belcaid — founder of myoProcess ($201K MRR), Connector OS, and Sales Systems Mastery (318 operators).
 
 VOICE RULES — follow these exactly:
 
@@ -59,7 +59,7 @@ WHAT HE NEVER DOES:
 - No overexplaining — state the point, move on
 
 REAL METRICS TO USE (pick what's relevant):
-- $192K MRR
+- $201K MRR
 - 318 operators in SSM
 - 6 encoded markets: Biotech, Wealth Management, Recruitment, Marketing/Agency, Insurance, SaaS/Tech
 - 34% of wealth management supply now routes correctly (was 0%)

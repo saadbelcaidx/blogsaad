@@ -6,7 +6,7 @@ This file exists so any Claude session working in this project immediately under
 
 ## WHO IS SAAD
 
-- Founder of **myoProcess** ($192K MRR, $3M/yr B2B connector business)
+- Founder of **myoProcess** ($201K MRR, $3M/yr B2B connector business)
 - Founder of **Connector OS** — free signal-based routing platform for B2B operators
 - Founder of **Sales Systems Mastery (SSM)** — operator community, 318+ members
 - Background: nightclub bouncer → Upwork freelancer (banned) → connector operator → platform builder
@@ -72,7 +72,7 @@ Read every blog post before writing anything. These patterns are extracted direc
 - "Wonderful, truly wonderful"
 
 ### Tone markers
-- Philosophical but grounded in real numbers ($192K MRR, 318 operators, 34% WM routing)
+- Philosophical but grounded in real numbers ($201K MRR, 318 operators, 34% WM routing)
 - Personal stories used as proof, not relatability bait
 - Zero motivational poster language — he despises it and writes against it explicitly
 - Honesty over polish: "(Looking back, this was probably naive.)"
@@ -157,7 +157,7 @@ Daily: X/Twitter (threads, single tweets, insights)
 
 ## REAL METRICS (use these in content)
 
-- $192K MRR (myoProcess)
+- $201K MRR (myoProcess)
 - 318 operators in SSM
 - 6 markets encoded in Connector OS: Biotech, Wealth Management, Recruitment, Marketing/Agency, Insurance, SaaS/Tech
 - 34% of wealth management supply now routes correctly (was 0%)
@@ -273,7 +273,7 @@ The training ID is printed when training starts.
 
 ```bash
 # Generate thumbnails (default: 2 variations, lora method, dark style)
-npm run thumb -- "THE $192K PLAYBOOK"
+npm run thumb -- "THE $201K PLAYBOOK"
 npm run thumb -- "F*CK LIMITING\nBELIEFS" --style clean
 npm run thumb -- "COLD OPERATOR" --method lora --style dramatic --count 3
 npm run thumb -- --no-text --style dark --count 1

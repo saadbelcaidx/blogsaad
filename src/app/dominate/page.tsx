@@ -380,7 +380,7 @@ function ThumbnailsTab({ storedPassword }: { storedPassword: string }) {
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder='e.g. THE $192K PLAYBOOK'
+          placeholder='e.g. THE $201K PLAYBOOK'
           className="w-full bg-transparent text-[16px] font-semibold text-neutral-100 placeholder-neutral-600 outline-none"
         />
         <p className="mt-1.5 text-[11px] text-neutral-600">

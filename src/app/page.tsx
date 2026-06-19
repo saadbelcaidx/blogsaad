@@ -12,7 +12,7 @@ export default function Home() {
           Saad Belcaid
         </h1>
         <p className="mt-2 text-sm text-neutral-400 leading-relaxed">
-          $192K MRR. Built with introductions, not ads. Founder of myoProcess, Connector OS, and SSM — 318 operators learning to own the middle.
+          $201K MRR. Built with introductions, not ads. Founder of myoProcess, Connector OS, and SSM — 318 operators learning to own the middle.
         </p>
         <p className="mt-1 text-sm text-neutral-500">
           I write about how markets actually work.

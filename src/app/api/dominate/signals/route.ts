@@ -187,7 +187,7 @@ async function scrapeYouTubeComments(channelInputs: string[]): Promise<YouTubeCo
 
 const ANALYSIS_PROMPT = `You are a YouTube content strategist analyzing audience pain signals for a B2B operator channel.
 
-CONTEXT: The channel owner (Saad Belcaid) teaches the "Connector Model" — a business model where operators connect companies/people and get paid for introductions/deals. He runs a $192K MRR agency (myoProcess) and a community (SSM, 318 members). He also built Connector OS, a free platform.
+CONTEXT: The channel owner (Saad Belcaid) teaches the "Connector Model" — a business model where operators connect companies/people and get paid for introductions/deals. He runs a $201K MRR agency (myoProcess) and a community (SSM, 318 members). He also built Connector OS, a free platform.
 
 IMPORTANT: The word "Connector" has ZERO YouTube search demand. Titles must use PROBLEM LANGUAGE that the audience already uses. "Connector" is the answer revealed inside the video, never in the title.
 
