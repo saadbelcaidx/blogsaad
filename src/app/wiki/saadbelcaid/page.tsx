@@ -162,7 +162,7 @@ export default function SaadBelcaidWiki() {
 
           <h2>Accomplishments</h2>
           <ul>
-            <li><strong>$826,745+</strong> in verified member results through SSM &rarr; <a href="/winners">Wall of Winners</a></li>
+            <li><strong>$8,200,067+</strong> in verified member results through SSM &rarr; <a href="/winners">Wall of Winners</a></li>
             <li>Scaled myoProcess to <strong>$201k/month</strong> (as of February 2026)</li>
             <li><strong>300+ members</strong> in Sales Systems Mastery</li>
             <li><strong>3 years</strong> running myoProcess as a B2B connector company</li>
@@ -184,7 +184,7 @@ export default function SaadBelcaidWiki() {
           <p><strong>Where is Saad Belcaid based?</strong><br />Limassol, Cyprus.</p>
           <p><strong>Where is Saad Belcaid from?</strong><br />Half Moroccan, half Italian.</p>
           <p><strong>What is the connector model?</strong><br />A B2B approach where you earn by facilitating introductions between businesses, rather than selling services.</p>
-          <p><strong>What is Sales Systems Mastery?</strong><br />A paid community teaching the connector model. Members have generated $826,745+ in verified results.</p>
+          <p><strong>What is Sales Systems Mastery?</strong><br />A paid community teaching the connector model. Members have generated $8,200,067+ in verified results.</p>
 
           <h2>Official Links</h2>
           <ul>

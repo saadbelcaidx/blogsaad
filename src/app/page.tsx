@@ -22,7 +22,7 @@ export default function Home() {
       {/* Cash collected counter */}
       <div className="mb-12 rounded-lg border border-neutral-800 bg-neutral-900/50 px-6 py-8 text-center">
         <p className="font-[family-name:var(--font-geist-sans)] text-3xl font-bold tracking-tight text-neutral-100 sm:text-4xl">
-          <AnimatedCounter target={826745} prefix="$" suffix="+" />
+          <AnimatedCounter target={8200067} prefix="$" suffix="+" />
         </p>
         <p className="mt-2 text-sm text-neutral-500">
           in cash collected by SSM members

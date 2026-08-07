@@ -57,7 +57,7 @@ const faqJsonLd = {
       name: "What is Sales Systems Mastery?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Sales Systems Mastery (SSM) is a paid community teaching the connector model. Members have generated $826,745+ in verified results.",
+        text: "Sales Systems Mastery (SSM) is a paid community teaching the connector model. Members have generated $8,200,067+ in verified results.",
       },
     },
     {
@@ -167,7 +167,7 @@ const timeline = [
   { year: "2019–2022", title: "Nightclub Security", description: "Where discipline started. Working doors, reading people, learning control." },
   { year: "2022–2023", title: "Freelance Automation", description: "6 months on Upwork building lead gen systems. Got banned at the end." },
   { year: "2023", title: "Founded myoProcess", description: "Realized the leverage is in introductions, not outreach. Built the connector model." },
-  { year: "Dec 2024", title: "Launched Sales Systems Mastery", description: "Paid community teaching the connector model. $826K+ in member results." },
+  { year: "Dec 2024", title: "Launched Sales Systems Mastery", description: "Paid community teaching the connector model. $8,200,067+ in member results." },
   { year: "Dec 2025", title: "Launched Connector OS", description: "Free software for running a connector business at scale." },
 ];
 
@@ -251,7 +251,7 @@ export default function AboutPage() {
           </p>
           <p>
             <a href="/winners" className="text-[#a78bfa] hover:text-[#c4b5fd] transition-colors">
-              $826,745+ in verified member results &rarr; Wall of Winners
+              $8,200,067+ in verified member results &rarr; Wall of Winners
             </a>
           </p>
         </div>

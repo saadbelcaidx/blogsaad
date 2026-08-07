@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Saad Belcaid — Founder of myoProcess, Connector OS & Sales Systems Mastery",
-  description: "Saad Belcaid is the founder of myoProcess, Connector OS, and Sales Systems Mastery. $826K+ collected by SSM members using the connector framework.",
+  description: "Saad Belcaid is the founder of myoProcess, Connector OS, and Sales Systems Mastery. $8,200,067+ collected by SSM members using the connector framework.",
   metadataBase: new URL("https://saadbelcaid.me"),
   icons: {
     icon: "/saad.jpg",
